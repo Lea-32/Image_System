@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>多功能图片收藏及管理系统</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="多功能图片收藏及管理系统"/>
+
+    <!-- for-mobile-apps -->
+    <script>
+        addEventListener("load", function () {
+            setTimeout(hideURLbar, 0);
+        }, false);
+
+        function hideURLbar() {
+            window.scrollTo(0, 1);
+        }
+    </script>
+    <!-- //for-mobile-apps -->
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <!-- font-awesome icons -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}" />
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- //font-awesome icons -->
+
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" type="text/css" media="all" />
+    <link href="{{ url_for('static', filename='css/popuo-box.css') }}" rel="stylesheet" type="text/css" media="all" />
+
+    <link href="//fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i&subset=latin-ext" rel="stylesheet">
+
+</head>
+<body>
+	<div class="main">
+		<h1>多功能图片收藏及管理系统</h1>
+			<div class="w3l_main_grids">
+				<div class="agile-w3ls">
+					<div class="content-1">
+							<div class="inner">
+								<h2> </h2>
+								<p> </p>
+							</div>
+						</div>
+
+
+						<div class="agile-nav">
+							<nav>
+								<ul>
+									<li><a class="popup-with-zoom-anim" href="#small-dialog">登录</a></li>
+									<li><a class="popup-with-zoom-anim" href="#small-dialog1">注册</a></li>
+									<li><a class="popup-with-zoom-anim" href="#">找回密码</a></li>
+									<li><a class="popup-with-zoom-anim" href="#">隐私</a></li>
+									<div class="clear"></div>
+								</ul>
+							</nav>
+						</div>
+					</div>
+			</div>
+	<!-- small-dialog -->
+
+		<!-- 登录页面的标题 -->
+		<div id="small-dialog" class="mfp-hide w3ls_small_dialog wthree_pop">
+			<div class="w3l_main_grid1_w3ls_grid">
+				<h3>登录</h3>
+					<div class="w3_agile_main_left_grid_w3_agileits">
+						<form action="{{ url_for('login.login') }}" method="post">
+							<div class="agileits_w3layouts_user">
+								<i class="fa fa-user" aria-hidden="true"></i>
+								<input type="text" name="Name" placeholder="用户名" required="">
+							</div>
+							<div class="agileits_w3layouts_user">
+								<i class="fa fa-key" aria-hidden="true"></i>
+								<input type="password" name="Password" placeholder="密码" required="">
+							</div>
+							<div class="agile_remember">
+								<div class="agile_remember_left">
+									<div class="check">
+										<label class="checkbox"><input type="checkbox" name="checkbox"><i> </i>remember me</label>
+									</div>
+								</div>
+								<div class="agile_remember_right">
+									<a href="#">Forgot Password?</a>
+								</div>
+								<div class="clear"> </div>
+							</div>
+
+							                <!-- 添加用于显示错误信息的提示框 -->
+							<input type="submit" value="Sign In">
+
+						</form>
+					</div>
+				</div>
+		</div>
+	<!-- //小型对话框 -->
+	<!-- small-dialog1 -->
+	<div id="small-dialog1" class="mfp-hide w3ls_small_dialog wthree_pop">
+		<div class="w3l_main_grid1_w3ls_grid">
+					<h3>注册</h3>
+					<div class="w3_agile_main_left_grid_w3_agileits">
+						<form action="{{ url_for('register.register') }}" method="post">
+							<div class="agileits_w3layouts_user">
+								<i class="fa fa-user" aria-hidden="true"></i>
+								<input type="text" name="Name" placeholder="用户名" required="">
+							</div>
+							<div class="agileits_w3layouts_user">
+								<i class="fa fa-key" aria-hidden="true"></i>
+								<input type="password" name="Password" placeholder="密码" required="">
+							</div>
+							<div class="agileits_w3layouts_user">
+								<i class="fa fa-key" aria-hidden="true"></i>
+								<input type="password" name="ConfirmPassword" placeholder="确认密码" required="">
+							</div>
+							<div class="agileits_w3layouts_user">
+								<i class="fa fa-envelope-o" aria-hidden="true"></i>
+								<input type="email" name="Email" placeholder="邮箱号" required="">
+							</div>
+							<div class="check">
+								<label class="checkbox"><input type="checkbox" name="checkbox" checked=""><i> </i>我同意 <span>隐私政策</span></label>
+							</div>
+							<input type="submit" value="注册">
+
+						</form>
+					</div>
+				</div>
+		</div>
+	<!-- //small-dialog1 -->
+		<div class="agileits_copyright">
+
+		</div>
+		<!-- js -->
+		<script src="{{ url_for('static', filename='js/jquery-2.2.3.min.js') }}"></script>
+		<!-- //js -->
+
+		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.9/dist/umd/popper.min.js"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+		<!-- pop-up-box -->
+		<script src="{{ url_for('static', filename='js/jquery.magnific-popup.js') }}" type="text/javascript"></script>
+		<!--//pop-up-box -->
+
+
+
+		<script>
+		$(document).ready(function() {
+        $('.popup-with-zoom-anim').magnificPopup({
+            type: 'inline',
+            fixedContentPos: false,
+            fixedBgPos: true,
+            overflowY: 'auto',
+            closeBtnInside: true,
+            preloader: false,
+            midClick: true,
+            removalDelay: 300,
+            mainClass: 'my-mfp-zoom-in'
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        // 检查是否有错误信息，如果有则弹出提示框
+        {% if login_failed %}
+            // 弹出提示框
+            alert("用户名或密码无效，请重试。");
+        {% endif %}
+    });
+</script>
+	</div>
+
+
+</body>
+</html>

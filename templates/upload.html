@@ -1,0 +1,550 @@
+<!--
+上传组件
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload</title>
+        <link href="{{ url_for('static', filename='css/backhome.css') }}" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
+
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
+        <!-- Custom Theme files -->
+    <link href="{{ url_for('static', filename='css/style_upload.css') }}" rel="stylesheet" type="text/css" media="all" />
+    <!-- Custom Theme files -->
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <!-- Custom Theme files -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="File Upload Widget Responsive web template, Bootstrap Web Templates, Flat Web Templates, Andriod Compatible web template,
+    Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony Ericsson, Motorola web design" />
+    <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+</head>
+
+
+<body>
+
+<div class="backhome">
+    <!-- 返回标签 -->
+    <a href="{{ url_for('main.main') }}" class="backhome-link">
+        <i class="fas fa-arrow-left"></i> 返回主界面
+    </a>
+</div>
+<h1>图片上传</h1>
+
+<div class="upload">
+			<h3>选择文件</h3>
+
+	<div class="login-form">
+        <form id="upload" method="post" action="{{ url_for('upload.upload') }}" enctype="multipart/form-data">
+            <div>
+                <span>图片标题</span>
+                <input type="text" name="title" class="title" value="请输入你的图像标题" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = '请输入你的图像标题';}" />
+            </div>
+            <div>
+                <span>图片描述</span>
+                <input type="text" name="describe" class="describe" value="请输入你的图像描述" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = '请输入你的图像描述';}" />
+            </div>
+
+            <div>
+    <span>图片标签</span>
+    <div class="tag-selection">
+        <!-- 添加手动输入标签区域 -->
+        <div class="tag-input-container">
+            <input type="text" id="tagInput" placeholder="输入标签后按回车添加" />
+        </div>
+        
+        <!-- 已选标签区域 -->
+        <div class="selected-tags">
+            <h4>已选标签</h4>
+            <ul id="selectedTags"></ul>
+            <div class="tags-count">已选择 <span id="tagsCount">0</span>/10 个标签</div>
+        </div>
+        
+        <!-- 推荐标签区域 -->
+        <div class="suggested-tags">
+            <h4>推荐标签</h4>
+            <div id="suggestedTagsContainer">
+                <!-- 这里将通过JavaScript动态添加推荐标签 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加一个隐藏的input用于表单提交时传递标签数据 -->
+<input type="hidden" name="tags" id="tagsInput" value="">
+
+            <div id="drop">
+                <a>选择文件</a>
+                <input type="file" name="upl" multiple />
+            </div>
+
+				<ul>
+				<!-- The file uploads will be shown here -->
+				</ul>
+
+				<!-- 添加提交按钮 -->
+				<div class="submit-container">
+					<button type="button" id="submitButton" class="submit-btn" disabled>提交</button>
+				</div>
+
+			</form>
+		</div>
+
+	<!-- JavaScript Includes -->
+		<script src="{{ url_for('static', filename='js/jquery.knob.js') }}"></script>
+	<!-- JavaScript Includes -->
+
+	<!-- jQuery File Upload Dependencies -->
+		<script src="{{ url_for('static', filename='js/jquery.ui.widget.js') }} "></script>
+		<script src="{{ url_for('static', filename='js/jquery.iframe-transport.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/jquery.fileupload.js') }}"></script>
+	<!-- jQuery File Upload Dependencies -->
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <!-- 主JavaScript文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+
+</div>
+<script>
+// 获取相关DOM元素
+const tagList = document.getElementById('tag-list');
+const availableTags = document.getElementById('available-tags');
+
+// 监听预设标签按钮的点击事件
+availableTags.addEventListener('click', function(event) {
+    if (event.target && event.target.matches('.tag-button')) {
+        const tag = event.target.getAttribute('data-tag');
+        addTag(tag);
+    }
+});
+
+// 添加标签到标签栏
+function addTag(tag) {
+    // 检查标签是否已存在，避免重复添加
+    const existingTag = Array.from(tagList.getElementsByTagName('li')).find(li => li.textContent.trim() === tag);
+    if (existingTag) return; // 如果标签已存在，直接返回
+
+    const tagItem = document.createElement('li');
+    tagItem.textContent = tag;
+
+    // 创建删除按钮
+    const deleteIcon = document.createElement('i');
+    deleteIcon.classList.add('fas', 'fa-times');
+    deleteIcon.onclick = function() {
+        tagItem.remove();  // 删除标签
+    };
+
+    tagItem.appendChild(deleteIcon);
+    tagList.appendChild(tagItem);
+}
+
+// 如果需要在表单提交时将标签作为字段传递，可以在提交前处理
+document.getElementById('upload').addEventListener('submit', function(event) {
+    const tags = [];
+    tagList.querySelectorAll('li').forEach(function(tagItem) {
+        tags.push(tagItem.textContent.replace('×', '').trim());  // 提取标签内容
+    });
+    // 将标签传递给表单
+    const tagsInput = document.createElement('input');
+    tagsInput.type = 'hidden';
+    tagsInput.name = 'tags';  // 在后端接收的字段名
+    tagsInput.value = tags.join(',');  // 用逗号分隔标签
+    this.appendChild(tagsInput);
+});
+</script>
+
+<!-- 在</body>标签前添加新的样式 -->
+<style>
+.submit-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.submit-btn {
+    padding: 10px 30px;
+    background-color: #0788a5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.submit-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* 标签系统样式 */
+.tag-selection {
+    margin: 15px 0;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.tag-input-container {
+    margin-bottom: 15px;
+}
+
+#tagInput {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+#tagInput:focus {
+    outline: none;
+    border-color: #0788a5;
+    box-shadow: 0 0 0 3px rgba(7,136,165,0.1);
+}
+
+.selected-tags {
+    padding: 15px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    min-height: 100px;
+    transition: all 0.3s ease;
+}
+
+.selected-tags:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.selected-tags h4 {
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+/* 优化标签项样式 */
+.tag-item {
+    display: inline-flex;
+    align-items: center;
+    background: #f5f5f5;
+    color: #333;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    margin: 4px;
+    transition: all 0.2s ease;
+    animation: tagAppear 0.3s ease;
+}
+
+@keyframes tagAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.tag-text {
+    margin-right: 6px;
+    font-weight: normal;
+    color: #333;
+}
+
+/* 优化删除按钮 */
+.delete-tag {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+}
+
+.delete-tag:hover {
+    opacity: 1;
+    background: rgba(0,0,0,0.1);
+}
+
+.delete-tag i {
+    font-size: 10px;
+    color: #666;
+}
+
+/* 优化标签计数显示 */
+.tags-count {
+    font-size: 12px;
+    color: #666666;
+    margin-top: 10px;
+    text-align: right;
+    padding-top: 8px;
+    border-top: 1px solid #153d6e;
+}
+
+/* 优化滚动条 */
+#selectedTags {
+    padding: 8px;
+    background: transparent;
+    box-shadow: none;
+}
+
+#selectedTags::-webkit-scrollbar {
+    width: 4px;
+}
+
+#selectedTags::-webkit-scrollbar-track {
+    background: #f5f5f5;
+}
+
+#selectedTags::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 2px;
+}
+
+#selectedTags::-webkit-scrollbar-thumb:hover {
+    background: #ccc;
+}
+
+/* 修改推荐标签样式 */
+.tag-suggestion {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 15px;
+    margin: 5px;
+    background: #0788a5;
+    border: 2px solid #0788a5;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tag-suggestion:hover {
+    background: #0788a5;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(7, 136, 165, 0.2);
+}
+
+.tag-suggestion .confidence {
+    margin-left: 8px;
+    padding: 2px 6px;
+    background: rgba(7, 136, 165, 0.1);
+    border-radius: 10px;
+    font-size: 12px;
+    color: #0788a5;
+}
+
+.tag-suggestion:hover .confidence {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.top-tag {
+    position: relative;
+}
+
+.top-tag::before {
+    content: attr(data-rank);
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 20px;
+    height: 20px;
+    background: #0788a5;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.tags-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tags-section h5 {
+    margin-bottom: 15px;
+    color: #0788a5;
+    font-weight: 600;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* 已选标签样式 */
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    background: #0788a5;
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    border: 1px solid #0788a5;
+    margin: 4px;
+    transition: all 0.2s ease;
+}
+
+.selected-tag .delete-icon {
+    margin-left: 6px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.selected-tag .delete-icon:hover {
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+/* 添加标签容器的滚动效果 */
+#selectedTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+    min-height: 60px;
+    max-height: 150px;
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+}
+
+/* 自定义滚动条样式 */
+#selectedTags::-webkit-scrollbar {
+    width: 6px;
+}
+
+#selectedTags::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#selectedTags::-webkit-scrollbar-thumb {
+    background: #0788a5;
+    border-radius: 3px;
+}
+
+#selectedTags::-webkit-scrollbar-thumb:hover {
+    background: #056b8a;
+}
+
+/* 添加到现有的样式中 */
+.tags-section {
+    margin-bottom: 15px;
+}
+
+.tags-section h5 {
+    color: #0788a5;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(7, 136, 165, 0.1);
+}
+
+.tag-suggestion i.fa-image {
+    color: #0788a5;
+}
+
+.tag-suggestion i.fa-font {
+    color: #28a745;
+}
+
+.delete-tag {
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    margin-left: 6px;
+    cursor: pointer;
+}
+
+.delete-tag:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* 修改已选标签的样式 */
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #0788a5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin: 4px;
+    font-size: 13px;
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+.selected-tag:hover {
+    background-color: #131212;
+}
+
+.selected-tag .delete-icon {
+    margin-left: 6px;
+    font-size: 12px;
+    color: #0f0707;
+    cursor: pointer;
+    padding: 2px;
+    transition: all 0.2s ease;
+}
+
+.selected-tag .delete-icon:hover {
+    color: #666;
+}
+
+/* 已选标签容器样式 */
+#selectedTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+    min-height: 40px;
+    background-color: #fff;
+    border-radius: 4px;
+}
+
+/* 标签动画 */
+@keyframes tagAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.selected-tag {
+    animation: tagAppear 0.2s ease;
+}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!-- 修改图片详情页面的布局结构 -->
+<div class="detail-container">
+    <!-- 返回按钮区域 -->
+    <div class="backhome">
+        <a href="{{ url_for('main.main') }}" class="backhome-link">
+            <i class="fas fa-arrow-left"></i> 返回主界面
+        </a>
+    </div>
+
+    <!-- 图片展示区域 -->
+    <div class="image-section">
+        <img src="{{ url_for('static', filename='images/user_upload/' + image.img_path + '.jpg') }}" alt="{{ image.img_name }}">
+    </div>
+
+    <!-- 图片信息区域 -->
+    <div class="info-section">
+        <div class="info-header">
+            <h1>{{ image.img_name }}</h1>
+            <div class="upload-info">
+                <span class="upload-time">
+                    <i class="far fa-clock"></i> 
+                    上传时间：{{ image.img_upload_time }}
+                </span>
+                <span class="image-size">
+                    <i class="fas fa-expand"></i>
+                    尺寸：{{ image.img_width }} x {{ image.img_height }}
+                </span>
+            </div>
+        </div>
+
+        <div class="description">
+            <h3>图片描述</h3>
+            <p>{{ image.img_description }}</p>
+        </div>
+
+        <div class="tags-container">
+            <h3>图片标签</h3>
+            <div class="tags">
+                {% for tag in tags %}
+                <span class="tag">{{ tag.tag_name }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加样式 -->
+<style>
+.detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+}
+
+.backhome {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+}
+
+.backhome-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 25px;
+    color: #333;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.backhome-link:hover {
+    background-color: #0788a5;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.backhome-link i {
+    margin-right: 8px;
+}
+
+.image-section {
+    margin: 40px 0;
+    text-align: center;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.image-section img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.info-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.info-header {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.info-header h1 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.upload-info {
+    display: flex;
+    gap: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.upload-info span {
+    display: flex;
+    align-items: center;
+}
+
+.upload-info i {
+    margin-right: 8px;
+    color: #0788a5;
+}
+
+.description {
+    margin: 25px 0;
+}
+
+.description h3 {
+    color: #333;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.description p {
+    color: #666;
+    line-height: 1.6;
+}
+
+.tags-container {
+    margin-top: 25px;
+}
+
+.tags-container h3 {
+    color: #333;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tag {
+    background: #f0f8ff;
+    color: #0788a5;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.tag:hover {
+    background: #0788a5;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .detail-container {
+        padding: 10px;
+    }
+    
+    .backhome {
+        position: static;
+        margin-bottom: 20px;
+    }
+    
+    .backhome-link {
+        display: inline-flex;
+    }
+    
+    .info-section {
+        padding: 20px;
+    }
+    
+    .info-header h1 {
+        font-size: 20px;
+    }
+    
+    .upload-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+</style> 

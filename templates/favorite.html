@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>用户收藏夹</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+
+    <!-- FontAwesome CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_favorite.css') }}">
+
+        <style>
+        /* 添加的CSS代码 */
+/* 左侧菜单背景色 */
+.site-navigation {
+    background-color: #000;
+}
+
+/* 修改站点标题文字颜色 */
+.site-title a {
+    color: #fff;
+}
+
+/* 修改导航菜单文字颜色 */
+.main-menu li a {
+    color: #fff;
+}
+
+.main-menu li a:hover,
+.main-menu li.current-menu-item a {
+    color: #f0437e;
+}
+
+/* 修改社交媒体链接颜色 */
+.social-profiles ul li a {
+    color: #fff;
+}
+
+.social-profiles ul li a:hover {
+    color: #f0437e;
+}
+
+.site-header {
+    background-color: #000; /* 黑色背景 */
+    color: #fff; /* 白色文字 */
+}
+
+/* 修改 hamburger-menu 图标颜色 */
+.hamburger-menu .menu-icon img,
+.hamburger-menu .menu-close-icon img {
+    filter: brightness(0) invert(1); /* 将图标颜色反转为白色 */
+}
+
+.site-title img {
+    max-width: 100%; /* 设置最大宽度为父元素的100% */
+    max-height: 100px; /* 设置最大高度 */
+    /* 可以根据实际需要调整宽度和高度 */
+}
+
+        </style>
+
+</head>
+
+<body>
+<header class="site-header">
+    <div class="site-branding">
+        <h1 class="site-title"><a href="{{ url_for('main.main') }}" rel="home"><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Homepage"></a></h1>
+    </div><!-- .site-branding -->
+
+    <div class="hamburger-menu">
+        <div class="menu-icon">
+            <img src="{{ url_for('static', filename='images/favorite/menu-icon.png') }}" alt="menu icon">
+        </div><!-- .menu-icon -->
+
+        <div class="menu-close-icon">
+            <img src="{{ url_for('static', filename='images/favorite/x.png') }}" alt="menu close icon">
+        </div><!-- .menu-close-icon -->
+    </div><!-- .hamburger-menu -->
+</header><!-- .site-header -->
+
+<nav class="site-navigation flex flex-column justify-content-between">
+    <div class="site-branding d-none d-lg-block ">
+        <h1 class="site-title"><a href="{{ url_for('main.main') }}" rel="home"><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Homepage"></a></h1>
+    </div><!-- .site-branding -->
+
+    <ul class="main-menu flex flex-column justify-content-center">
+        <li class="current-menu-item"><a href="{{ url_for('main.main') }}">返回首页</a></li>
+        <li><a href="#">关于</a></li>
+        <li><a href="#">Contact</a></li>
+    </ul>
+
+    <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+</p>
+
+
+    <div class="social-profiles">
+        <ul class="flex justify-content-start justify-content-lg-center align-items-center">
+            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+            <li><a href="#"><i class="fa fa-instagram"></i></a></li>
+            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+            <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
+        </ul>
+    </div><!-- .social-profiles -->
+</nav><!-- .site-navigation -->
+
+<div class="nav-bar-sep d-lg-none"></div>
+<div class="outer-container home-page">
+    <div class="container-fluid">
+        <div class="row"><!-- .正文内容，替换成数据库中的favorite -->
+            {% for img in imgs %}
+            <div class="col-12 col-md-6 col-lg-3 no-padding">
+                <div class="portfolio-content">
+                    <figure>
+                        <img src="{{ url_for('static', filename='images/user_upload/' + img['img_path'] + '.' + img['img_format']) }}" alt="">
+                    </figure>
+
+                    <div class="entry-content flex flex-column align-items-center justify-content-center">
+                        <h3><a href="#">{{ img['img_name'] }}</a></h3>
+
+                        <ul class="flex flex-wrap justify-content-center">
+                            <li><a href="#">{{ img['img_label'] }}</a></li>
+                        </ul>
+                    </div><!-- .entry-content -->
+                </div><!-- .portfolio-content -->
+            </div><!-- .col -->
+            {% endfor %}
+        </div><!-- .row -->
+    </div><!-- .container-fluid -->
+</div><!-- .outer-container -->
+
+<div class="scroll-down flex flex-column justify-content-center align-items-center d-none d-lg-block">
+    <span class="arrow-down flex justify-content-center align-items-center"><img src="{{ url_for('static', filename='images/favorite/arrow-down.png') }}" alt="arrow"></span>
+    <!-- <span class="scroll-text">Scroll Down</span> -->
+</div><!-- .scroll-down -->
+
+<script type='text/javascript' src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+<script type='text/javascript' src="{{ url_for('static', filename='js/custom.js') }}"></script>
+
+</body>
+</html>

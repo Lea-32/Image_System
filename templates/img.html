@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-CN">
+<head>
+    <!--- basic page needs
+    ================================================== -->
+    <meta charset="utf-8">
+    <title>图片详细内容</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- mobile specific metas
+    ================================================== -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSS
+    ================================================== -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <!-- script
+    ================================================== -->
+    <script src="{{ url_for('static', filename='js/modernizr.js') }}"></script>
+
+    <!-- favicons
+    ================================================== -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+
+    <style>
+  .entry__post-thumb {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh; /* 您可以根据设计调整高度 */
+  }
+  .entry__post-thumb img {
+    width: 100%;
+    height: auto;
+}
+
+</style>
+
+    <!-- 在 header 部分添加 Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+</head>
+
+<body class="ss-bg-white"><!-- HTML文档主体的开头标签。class属性用于样式，表示背景颜色应为白色。 -->
+
+    <!-- preloader预加载器，是一个视觉指示器，表示页面正在加载。
+    ================================================== -->
+    <div id="preloader">
+        <div id="loader" class="dots-fade">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <!-- 整个站点内容的主要包装器。-->
+    <div id="top" class="s-wrap site-wrapper">
+
+        <!-- site header 定义页面的页眉部分，包括站点标志、导航菜单和社交链接。
+        ================================================== -->
+        <header class="s-header header">
+
+            <div class="header__top">
+                <div class="header__logo">
+                    <a class="site-logo" href="{{ url_for('main.main') }}">
+                        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Homepage">
+                    </a>
+                </div>
+            </div> <!-- end header__top -->
+
+            <nav class="header__nav-wrap">
+
+                <ul class="header__nav">
+                    <li><a href="{{ url_for('main.main') }}" title="">返回首页</a></li>
+                    <!--<li><a href="page-about.html" title="">About</a></li>-->
+                </ul> <!-- end header__nav -->
+
+                <ul class="header__social">
+                    <li class="ss-facebook">
+                        <a href="https://facebook.com/">
+                            <span class="screen-reader-text">Facebook</span>
+                        </a>
+                    </li>
+                    <li class="ss-twitter">
+                        <a href="#0">
+                            <span class="screen-reader-text">Twitter</span>
+                        </a>
+                    </li>
+                    <li class="ss-dribbble">
+                        <a href="#0">
+                            <span class="screen-reader-text">Instagram</span>
+                        </a>
+                    </li>
+                    <li class="ss-behance">
+                        <a href="#0">
+                            <span class="screen-reader-text">Behance</span>
+                        </a>
+                    </li>
+                </ul>
+
+            </nav> <!-- end header__nav-wrap -->
+
+            <!-- menu toggle -->
+            <a href="#0" class="header__menu-toggle">
+                <span>Menu</span>
+            </a>
+
+        </header> <!-- end s-header -->
+
+        <!-- site content包含页面的主要内容，包括一篇文章、评论和评论表单。
+        ================================================== -->
+        <div class="s-content content">
+            <main class="row content__page">
+                
+                <article class="column large-full entry format-standard">
+
+                    <div class="media-wrap entry__media">
+                        <div class="entry__post-thumb">
+                            <img src="{{ url_for('static', filename='images/user_upload/' + image['img_path'] + '.' + image['img_format']) }}"
+                         sizes="(max-width: 2000px) 100vw, 2000px" alt="">
+                        </div>
+                    </div>
+
+                    <div class="content__page-header entry__header">
+                        <h1 class="display-1 entry__title">
+                        {{ image['img_name'] }}
+                        </h1>
+                        <ul class="entry__header-meta">
+                            <li class="author">By <a href="#0">{{ image.user_name }}</a></li>
+                            <li class="date">{{ image['img_upload_time'] }}</li>
+                        </ul>
+                    </div> <!-- end entry__header -->
+
+                    <div class="entry__content">
+                        <p>
+                        {{ image['img_description'] }}<!-- 图像描述 -->
+                        </p>
+
+
+                        <p class="entry__tags">
+                            <span>标签</span>
+
+                            <span class="entry__tag-list"><!-- 标签 -->
+                                {% for tag in tags %}
+                                <a href="#0">{{ tag.tag_name }}</a>
+                                {% endfor %}
+                            </span>
+            
+                        </p>
+                    </div> <!-- end entry content -->
+
+
+
+                </article> <!-- end column large-full entry-->
+
+
+                <div class="comments-wrap">
+
+                    <div id="comments" class="column large-12">
+
+                        <h3 class="h2">评论</h3><!-- 需要传递该图片的评论量参数-->
+
+                        <!-- START commentlist -->
+                        <ol class="commentlist">
+                            <!-- for循环展示评论-->
+                            {% for comment in comments %}
+                            <li class="depth-1 comment">
+                                <div class="comment__avatar">
+                                    <img class="avatar" src="{{ url_for('static', filename='images/user.jpg')}}" alt="user" width="50" height="50">
+                                </div>
+
+                                <div class="comment__content">
+                                    <div class="comment__info">
+                                        <div class="comment__author">{{ comment.user_name }}</div>
+                                        <div class="comment__meta">
+                                            <div class="comment__time">{{ comment.comment_release_time}}</div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="comment__text">
+                                        <p>{{ comment.comment_content }}</p>
+                                    </div>
+
+                                </div>
+
+                            </li> <!-- end comment level 1 -->
+
+                            {% endfor %}
+
+
+
+
+
+                        </ol>
+                        <!-- END commentlist -->
+
+                    </div> <!-- end comments -->
+
+                    <!-- 提交评论 -->
+                    <div class="column large-12 comment-respond">
+
+                        <!-- START respond -->
+                        <div id="respond">
+            
+                            <h3 class="h2">发表评论 </h3>
+
+                            <form name="commentForm" id="commentForm" method="post" action="{{ url_for('add_comment.add_comment') }}" autocomplete="off">
+                                <div class="message form-field">
+                                    <textarea name="commentText" id="commentText" class="full-width" placeholder="请留下你的评论"></textarea>
+                                </div>
+                                <input name="imgId" type="hidden" value="{{image['img_id']}}">
+                                <input name="submitComment" id="submitComment" class="btn btn--primary btn-wide btn--large full-width" value="添加评论" type="submit">
+                            </form>
+            
+                        </div>
+                        <!-- END respond-->
+            
+                    </div> <!-- end comment-respond -->
+            
+                </div> <!-- end comments-wrap -->
+            </main>
+
+        </div> <!-- end s-content -->
+
+
+        <!-- footer定义页面的页脚部分，包括版权信息和“返回顶部”链接。
+        ================================================== -->
+        <footer class="s-footer footer">
+            <div class="row">
+                <div class="column large-full footer__content">
+                    <div class="footer__copyright">
+                    
+                    </div>
+                </div>
+            </div>
+
+            <div class="go-top">
+                <a class="smoothscroll" title="Back to Top" href="#top"></a>
+            </div>
+        </footer>
+
+    </div> <!-- end s-wrap -->
+
+
+    <!-- Java Script
+    ================================================== -->
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>

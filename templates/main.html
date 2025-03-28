@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-CN">
+<head>
+    <!--- basic page needs -->
+    <meta charset="utf-8">
+    <title>多功能图片收藏系统</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- mobile specific metas-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSS-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <!-- script -->
+    <script src="{{ url_for('static', filename='js/modernizr.js') }}"></script>
+
+    <!-- favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+</head>
+
+<body>
+
+    <!-- 预加载器
+    ================================================== -->
+    <div id="preloader">
+        <div id="loader" class="dots-fade">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <div id="top" class="s-wrap site-wrapper"><!-- 整个站点的主容器 -->
+
+        <!-- 页头
+        ================================================== -->
+        <header class="s-header">
+
+            <div class="header__top">
+                <div class="header__logo">
+                    <a class="site-logo" href="{{ url_for('main.main') }}">
+                        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Homepage">
+                    </a>
+                </div>
+            </div> <!-- end header__top -->
+
+            <nav class="header__nav-wrap">
+
+                <ul class="header__nav">
+                    <li class="current"><a href="{{ url_for('main.main') }}" title="">首页</a></li>
+
+                    <li><a href="#" onclick="checkLoginAndRedirect('{{ url_for('upload.upload') }}')" title="">图片上传</a></li><!-- 侧边搜索栏 -->
+                    <li><a href="#" onclick="checkLoginAndRedirect('{{ url_for('favorite.favorite') }}')" title="">我的收藏</a></li>
+
+                    {% if 'user_id' in session %}
+                    <a href="{{ url_for('logout.logout') }}" title="">退出登录</a></li>
+                    {% else %}
+                    <li><a href="{{ url_for('login.login') }}" title="">登录</a></li>
+                    {% endif %}
+                    <li><a href="#" title="">关于</a></li>
+                </ul> <!-- end header__nav -->
+
+                <ul class="header__social"><!-- 图标链接 -->
+                    <li class="ss-facebook">
+                        <a href="https://facebook.com/">
+                            <span class="screen-reader-text">Facebook</span>
+                        </a>
+                    </li>
+                    <li class="ss-twitter">
+                        <a href="#0">
+                            <span class="screen-reader-text">Twitter</span>
+                        </a>
+                    </li>
+                    <li class="ss-dribbble">
+                        <a href="#0">
+                            <span class="screen-reader-text">Dribbble</span>
+                        </a>
+                    </li>
+                    <li class="ss-pinterest">
+                        <a href="#0">
+                            <span class="screen-reader-text">Behance</span>
+                        </a>
+                    </li>
+                </ul>
+
+            </nav> <!-- end header__nav-wrap -->
+
+            <!-- menu toggle 在移动设备上使用的用于触发菜单切换的HTML元素 -->
+            <a href="#0" class="header__menu-toggle">
+                <span>Menu</span>
+            </a>
+
+        </header> <!-- end s-header -->
+
+        <!-- 搜索栏
+        ================================================== -->
+        <div class="s-search">
+
+            <div class="search-block">
+    
+                <form role="search" method="get" class="search-form" action="{{ url_for('search.search') }}">
+                    <label>
+                        <span class="hide-content">Search for:</span>
+                        <input type="search" class="search-field" placeholder="Type Keywords" value="" name="search_content" title="Search for:" autocomplete="off">
+                    </label>
+                    <input type="submit" class="search-submit" value="Search">
+                </form>
+    
+                <a href="#0" title="Close Search" class="search-close">Close</a>
+    
+            </div>  <!-- end search-block -->
+
+            <!-- search modal trigger -->
+            <a href="#0" class="search-trigger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:rgba(0, 0, 0, 1);transform:;-ms-filter:"><path d="M10,18c1.846,0,3.543-0.635,4.897-1.688l4.396,4.396l1.414-1.414l-4.396-4.396C17.365,13.543,18,11.846,18,10 c0-4.411-3.589-8-8-8s-8,3.589-8,8S5.589,18,10,18z M10,4c3.309,0,6,2.691,6,6s-2.691,6-6,6s-6-2.691-6-6S6.691,4,10,4z"></path></svg>
+                <span>Search</span>
+            </a>
+            <span class="search-line"></span>
+
+        </div> <!-- end s-search -->
+
+        <!-- site content          主要内容部分
+        ================================================== -->
+        <div class="s-content">
+            
+            <div class="masonry-wrap">
+
+                <div class="masonry">
+    
+                    <div class="grid-sizer"></div>
+
+            {% for image in images %}<!-- 循环遍历数据库中的图像数据 -->
+                <article class="masonry__brick entry format-standard animate-this">
+                    <div class="entry__thumb">
+                        <a href="#" onclick="checkLoginAndRedirect('{{ url_for('img.img', img_id = image['img_id']) }}')"  class="entry__thumb-link">
+                            <img src="{{ url_for('static', filename='images/user_upload/' + image['img_path'] + '.' + image['img_format']) }}" alt="{{ image['img_name'] }}">
+                        </a>
+                    </div>
+
+                    <div class="entry__text">
+                        <div class="entry__header">
+                            <!-- 图像标题链接 -->
+                            <h2 class="entry__title"><a href="#" onclick="checkLoginAndRedirect('{{ url_for('img.img', img_id = image['img_id']) }}')">{{ image['img_name'] }}</a>
+                                <button class="favorite-button star-button {% if image_favorited_status.get(image['img_id']) %}已收藏{% endif %}" onclick="toggleFavorite(this, {{ image['img_id'] }})">
+                                    <img src="{{ url_for('static', filename='images/main/')}}{% if image_favorited_status.get(image['img_id']) %}收藏2.png{% else %}收藏1.png{% endif %}" class="star-icon" alt="Favorite">
+                                </button>
+                            </h2>
+
+                            <div class="entry__meta">
+                                <span class="entry__meta-cat">
+                                    <!-- 图像标签链接 -->
+                                    <a href="#" onclick="checkLoginAndRedirect('{{ url_for('img.img', img_id = image['img_id']) }}')">{{ image['img_label'] }}</a>
+                                </span>
+
+                                <span class="entry__meta-date">
+                                    <!-- 图像上传日期链接 -->
+                                    <a href="#" onclick="checkLoginAndRedirect('{{ url_for('img.img', img_id = image['img_id']) }}')">{{ image['img_upload_time'] }}</a>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="entry__excerpt">
+                            <!-- 图像描述 -->
+                            <p>{{ image['img_description'] }}</p>
+                            <button class="delete-button" onclick="deleteImage('{{ image['img_id'] }}')">Delete</button>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+
+                    <!-- 名句引用 -->
+                    <article class="masonry__brick entry format-quote animate-this">
+                            
+                        <div class="entry__thumb">
+                            <blockquote>
+                                <p>追逐影子的人，自己就是影子。</p>
+    
+                                <cite>荷马</cite>
+                            </blockquote>
+                        </div>   
+        
+                    </article> <!-- end article -->
+
+                    <article class="masonry__brick entry format-quote animate-this">
+
+                        <div class="entry__thumb">
+                            <blockquote>
+                                <p>失掉了现在，也就没有了未来。</p>
+
+                                <cite>鲁迅</cite>
+                            </blockquote>
+                        </div>
+
+                    </article> <!-- end article -->
+
+
+                </div> <!-- end masonry -->
+
+            </div> <!-- end masonry-wrap -->
+
+        </div> <!-- end s-content -->
+
+        <!-- footer
+        ================================================== -->
+        <footer class="s-footer">
+            <div class="row">
+                <div class="column large-full footer__content">
+                    <div class="footer__copyright">
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="go-top">
+                <a class="smoothscroll" title="Back to Top" href="#top"></a>
+            </div>
+        </footer>
+
+    </div> <!-- end s-wrap -->
+
+
+    <!-- Java Script
+    ================================================== -->
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<!-- 检查登录状态并跳转到指定链接 -->
+<script>
+    // JavaScript函数，检查登录状态并跳转到指定链接
+    function checkLoginAndRedirect(link) {
+        // 发送AJAX请求到后端检查登录状态
+        fetch('/check_login')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received data:', data);
+
+                // 如果已登录，直接跳转到链接
+                if (data.logged_in) {
+                    window.location.href = link;
+                } else {
+                    // 如果未登录，跳转到登录页面
+                    window.location.href = '/login';
+                }
+            })
+            .catch(error => {
+                console.error('Error checking login status:', error);
+            });
+    }
+</script>
+
+   <!-- 检查图片是否已被当前用户收藏-->
+<script>
+function image_is_favorited(img_id) {
+    fetch(`/check_favorite/${img_id}`, {
+        method: 'GET',
+        credentials: 'same-origin'  // 包含cookie在请求中
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`网络响应错误: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('收到的数据:', data);
+        return data.favorited;
+    })
+    .catch(error => {
+        console.error('检查收藏状态时发生错误:', error);
+        return false;
+    });
+}
+</script>
+
+<script>
+function toggleFavorite(button, img_id) {
+    fetch(`/like/${img_id}`, {
+        method: 'POST',
+        credentials: 'same-origin'  // ���含cookie在请求中
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`网络响应错误: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('收到的数据:', data);
+
+        // 获取星星图标
+        const starIcon = button.querySelector('.star-icon');
+
+        // 根据收藏状态更新星星图标的路径
+        starIcon.src = data.status === '已收藏'
+            ? '{{ url_for('static', filename='images/main/收藏2.png') }}'
+            : '{{ url_for('static', filename='images/main/收藏1.png') }}';
+
+        // 根据响应切换按钮样式
+        if (data.status === '已收藏') {
+            button.classList.add('已收藏');
+        } else {
+            button.classList.remove('已收藏');
+        }
+    })
+    .catch(error => {
+        console.error('切换收藏状态时发生错误:', error);
+    });
+}
+</script>
+
+</body>
