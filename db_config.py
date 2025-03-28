@@ -3,12 +3,12 @@ def config(is_admin):
     driver = 'ODBC Driver 17 for SQL Server'#'SQL Server'
     server = 'localhost'
     port = '1433'
-    database = 'Image_System'
+    database = 'image'
 
     if is_admin:
         # 管理员账号
         username = 'sa'
-        password = '789879'
+        password = '123456'
 
     else:#普通用户账号
         username = 'user'
