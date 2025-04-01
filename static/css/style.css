@@ -43,11 +43,7 @@ ul,label{
 body a:hover,body a{
 	text-decoration:none;
 }
-body {
-    background: url(../images/1.jpg);
-    background-size: cover;
-	min-height: 100vh;
-}
+
 /*-- main --*/
 .agileits_copyright{
 	text-align: center;
@@ -74,6 +70,29 @@ input[type="submit"],.btn-primary,.agileits_copyright p a,.w3l_search_bottom ul.
 	-o-transition:.5s ease-in;
 	-ms-transition:.5s ease-in;
 }
+input, button {
+    transition: all 0.3s ease;
+}
+
+input:focus, button:hover {
+    transform: scale(1.05);
+}
+
+/* 页面背景和阴影 */
+body {
+    background: #f7f7f7;
+}
+
+/* 错误提示框 */
+#error-message {
+    display: none;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 5px;
+}
+
 .main {
     padding: 8em 0 6.5em;
 }

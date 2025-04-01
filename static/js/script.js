@@ -362,6 +362,13 @@ $(function(){
         e.preventDefault();
     });
 
+    $(document).ready(function() {
+    // 处理登录失败的错误信息
+    {% if login_failed %}
+        $('#error-message').removeClass('hidden');
+    {% endif %}
+});
+
     function formatFileSize(bytes) {
         if (typeof bytes !== 'number') {
             return '';

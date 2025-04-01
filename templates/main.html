@@ -103,7 +103,7 @@
         <div class="s-search">
 
             <div class="search-block">
-    
+
                 <form role="search" method="get" class="search-form" action="{{ url_for('search.search') }}">
                     <label>
                         <span class="hide-content">Search for:</span>
@@ -111,9 +111,9 @@
                     </label>
                     <input type="submit" class="search-submit" value="Search">
                 </form>
-    
+
                 <a href="#0" title="Close Search" class="search-close">Close</a>
-    
+
             </div>  <!-- end search-block -->
 
             <!-- search modal trigger -->
@@ -128,11 +128,11 @@
         <!-- site content          主要内容部分
         ================================================== -->
         <div class="s-content">
-            
+
             <div class="masonry-wrap">
 
                 <div class="masonry">
-    
+
                     <div class="grid-sizer"></div>
 
             {% for image in images %}<!-- 循环遍历数据库中的图像数据 -->
@@ -175,15 +175,15 @@
 
                     <!-- 名句引用 -->
                     <article class="masonry__brick entry format-quote animate-this">
-                            
+
                         <div class="entry__thumb">
                             <blockquote>
                                 <p>追逐影子的人，自己就是影子。</p>
-    
+
                                 <cite>荷马</cite>
                             </blockquote>
-                        </div>   
-        
+                        </div>
+
                     </article> <!-- end article -->
 
                     <article class="masonry__brick entry format-quote animate-this">
