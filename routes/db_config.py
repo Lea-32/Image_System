@@ -8,7 +8,7 @@ def config(is_admin):
     if is_admin:
         # 管理员账号
         username = 'sa'
-        password = '789879'
+        password = '123456'
 
     else:#普通用户账号
         username = 'user'
