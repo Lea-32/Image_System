@@ -7,9 +7,23 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, Blueprint
 import pyodbc
 from db_config import config
+import os
+from datetime import datetime
 
 #蓝图
 img_bp = Blueprint('img', __name__)
+
+def get_file_size(file_path):
+    """获取文件大小"""
+    try:
+        size = os.path.getsize(file_path)
+        return size
+    except:
+        return 0
+
+def row_to_dict(row):
+    """将pyodbc.Row对象转换为字典"""
+    return {key: row[i] for i, key in enumerate([column[0] for column in row.cursor_description])}
 
 # 添加处理img URL的路由
 @img_bp.route('/img', methods=['GET', 'POST'])
@@ -42,16 +56,31 @@ def img(img_id=None):
             # 获取图像详细信息
             try:
                 cursor.execute("SELECT * from Image, Users WHERE img_id = ? AND Users.user_id=Image.user_id", img_id)
-                image = cursor.fetchone()
+                image_row = cursor.fetchone()
+                if not image_row:
+                    flash('图片不存在')
+                    return redirect(url_for('main.main'))
+                
+                # 将Row对象转换为字典
+                image = row_to_dict(image_row)
+                
+                # 获取图片文件路径
+                img_path = os.path.join('static/images/user_upload', f"{image['img_path']}.{image['img_format']}")
+                # 获取文件大小并添加到image字典
+                image['file_size'] = get_file_size(img_path)
+                
             except pyodbc.Error as e:
                 print(f"查询图片信息错误: {e}")
                 flash('获取图片信息失败')
                 return redirect(url_for('main.main'))
             
-            # 检查图片是否存在
-            if not image:
-                flash('图片不存在')
-                return redirect(url_for('main.main'))
+            # 更新浏览数
+            try:
+                cursor.execute("UPDATE Image SET view_count = view_count + 1 WHERE img_id = ?", img_id)
+                cn.commit()
+            except pyodbc.Error as e:
+                print(f"更新浏览数错误: {e}")
+                # 如果更新失败，不影响显示
 
             # 获取图像的评论
             try:

@@ -1,259 +1,454 @@
 <!DOCTYPE html>
 <html class="no-js" lang="zh-CN">
 <head>
-    <!--- basic page needs
-    ================================================== -->
     <meta charset="utf-8">
-    <title>图片详细内容</title>
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <!-- mobile specific metas
-    ================================================== -->
+    <title>{{ image['img_name'] }} | ImageFlow</title>
+    <meta name="description" content="{{ image['img_description'] }}">
+    <meta name="author" content="{{ image.user_name }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- CSS
-    ================================================== -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor.css') }}">
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
-    <!-- script
-    ================================================== -->
-    <script src="{{ url_for('static', filename='js/modernizr.js') }}"></script>
-
-    <!-- favicons
-    ================================================== -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
-    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
-
     <style>
-  .entry__post-thumb {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 70vh; /* 您可以根据设计调整高度 */
-  }
-  .entry__post-thumb img {
-    width: 100%;
-    height: auto;
-}
-
-</style>
-
-    <!-- 在 header 部分添加 Font Awesome 图标库 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --accent: #ec4899;
+            --dark: #111827;
+            --darker: #0d1321;
+            --light: #f3f4f6;
+            --gray: #6b7280;
+            --dark-gray: #374151;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--darker);
+            color: var(--light);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .bg-panel {
+            background-color: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .image-container {
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .image-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .image-container img {
+            transition: all 0.5s ease;
+        }
+        
+        .image-container:hover img {
+            transform: scale(1.02);
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: var(--dark-gray);
+            color: var(--light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .tag:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .comment-card {
+            transition: all 0.3s ease;
+            background-color: rgba(31, 41, 55, 0.6);
+            border-left: 3px solid transparent;
+        }
+        
+        .comment-card:hover {
+            transform: translateX(5px);
+            border-left-color: var(--primary);
+            background-color: rgba(31, 41, 55, 0.8);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 响应式布局调整 */
+        @media (max-width: 1024px) {
+            .two-column-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-panel {
+                order: -1;
+                margin-bottom: 2rem;
+            }
+        }
+        
+        /* Lightbox 自定义样式 */
+        .lb-nav a.lb-prev, 
+        .lb-nav a.lb-next {
+            opacity: 1 !important;
+        }
+        
+        .lb-data .lb-close {
+            opacity: 1 !important;
+            filter: none !important;
+        }
+    </style>
 </head>
 
-<body class="ss-bg-white"><!-- HTML文档主体的开头标签。class属性用于样式，表示背景颜色应为白色。 -->
+<body class="bg-darker">
 
-    <!-- preloader预加载器，是一个视觉指示器，表示页面正在加载。
-    ================================================== -->
-    <div id="preloader">
-        <div id="loader" class="dots-fade">
-            <div></div>
-            <div></div>
-            <div></div>
+    <!-- 预加载器 -->
+    <div id="preloader" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
+        <div class="dots-fade flex space-x-4">
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></div>
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse delay-100"></div>
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse delay-200"></div>
         </div>
     </div>
 
-    <!-- 整个站点内容的主要包装器。-->
-    <div id="top" class="s-wrap site-wrapper">
+    <!-- 页面容器 -->
+    <div id="top" class="min-h-screen flex flex-col">
 
-        <!-- site header 定义页面的页眉部分，包括站点标志、导航菜单和社交链接。
-        ================================================== -->
-        <header class="s-header header">
+        <!-- 头部导航 -->
+        <header class="sticky top-0 z-40 py-4 bg-black/80 backdrop-blur-sm border-b border-gray-800">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <a class="flex items-center" href="{{ url_for('main.main') }}">
+                            <span class="text-2xl font-bold gradient-text">ImageFlow</span>
+                        </a>
+                    </div>
+                    
+                    <nav class="hidden md:flex items-center space-x-6">
+                        <a href="{{ url_for('main.main') }}" class="text-gray-400 hover:text-indigo-400 transition-colors">返回首页</a>
+                        
+                        <a href="{{ url_for('favorite.favorite') }}" class="text-gray-400 hover:text-indigo-400 transition-colors">我的收藏</a>
+                    </nav>
+                    
+                    <button class="md:hidden text-gray-400 focus:outline-none" id="mobile-menu-button">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
 
-            <div class="header__top">
-                <div class="header__logo">
-                    <a class="site-logo" href="{{ url_for('main.main') }}">
-                        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Homepage">
+        <!-- 主要内容 - 两栏布局 -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <div class="two-column-layout grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- 左侧 - 大图展示区 -->
+                <div class="image-container animate__animated animate__fadeInLeft">
+                    <a href="{{ url_for('static', filename='images/user_upload/' + image['img_path'] + '.' + image['img_format']) }}" 
+                       data-lightbox="image-{{ image['img_id'] }}" 
+                       data-title="{{ image['img_name'] }}"
+                       class="block relative">
+                        <div class="flex items-center justify-center bg-gray-900/50 rounded-lg overflow-hidden" style="min-height: 70vh;">
+                            <img src="{{ url_for('static', filename='images/user_upload/' + image['img_path'] + '.' + image['img_format']) }}" 
+                                 alt="{{ image['img_name'] }}" 
+                                 class="max-w-full max-h-[70vh] object-contain animate__animated animate__fadeIn"
+                                 id="main-image"
+                                 onload="document.getElementById('image-loader').classList.add('hidden')">
+                            <div id="image-loader" class="absolute inset-0 flex items-center justify-center">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
                     </a>
                 </div>
-            </div> <!-- end header__top -->
-
-            <nav class="header__nav-wrap">
-
-                <ul class="header__nav">
-                    <li><a href="{{ url_for('main.main') }}" title="">返回首页</a></li>
-                    <!--<li><a href="page-about.html" title="">About</a></li>-->
-                </ul> <!-- end header__nav -->
-
-                <ul class="header__social">
-                    <li class="ss-facebook">
-                        <a href="https://facebook.com/">
-                            <span class="screen-reader-text">Facebook</span>
-                        </a>
-                    </li>
-                    <li class="ss-twitter">
-                        <a href="#0">
-                            <span class="screen-reader-text">Twitter</span>
-                        </a>
-                    </li>
-                    <li class="ss-dribbble">
-                        <a href="#0">
-                            <span class="screen-reader-text">Instagram</span>
-                        </a>
-                    </li>
-                    <li class="ss-behance">
-                        <a href="#0">
-                            <span class="screen-reader-text">Behance</span>
-                        </a>
-                    </li>
-                </ul>
-
-            </nav> <!-- end header__nav-wrap -->
-
-            <!-- menu toggle -->
-            <a href="#0" class="header__menu-toggle">
-                <span>Menu</span>
-            </a>
-
-        </header> <!-- end s-header -->
-
-        <!-- site content包含页面的主要内容，包括一篇文章、评论和评论表单。
-        ================================================== -->
-        <div class="s-content content">
-            <main class="row content__page">
                 
-                <article class="column large-full entry format-standard">
+                <!-- 右侧 - 信息面板 -->
+                <div class="info-panel bg-panel p-6 rounded-lg shadow-xl animate__animated animate__fadeInRight">
+                    <!-- 标题和收藏按钮 -->
+                    <div class="flex justify-between items-start mb-6">
+                        <h1 class="text-2xl md:text-3xl font-bold gradient-text">{{ image['img_name'] }}</h1>
 
-                    <div class="media-wrap entry__media">
-                        <div class="entry__post-thumb">
-                            <img src="{{ url_for('static', filename='images/user_upload/' + image['img_path'] + '.' + image['img_format']) }}"
-                         sizes="(max-width: 2000px) 100vw, 2000px" alt="">
+                    </div>
+                    
+                    <!-- 上传信息 -->
+                    <div class="flex items-center space-x-4 text-gray-400 mb-6">
+                        <div class="flex items-center">
+                            <img src="{{ url_for('static', filename='images/user.jpg')}}" alt="用户头像" class="w-8 h-8 rounded-full mr-2">
+                            <span>{{ image.user_name }}</span>
+                        </div>
+                        <span>•</span>
+                        <span>{{ image['img_upload_time'] }}</span>
+                    </div>
+                    
+                    <!-- 图片描述 -->
+                    <div class="prose prose-invert max-w-none mb-6">
+                        <p class="text-gray-300">{{ image['img_description'] }}</p>
+                    </div>
+                    
+                    <!-- 标签区域 -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-400 mb-3">标签</h3>
+                        <div class="flex flex-wrap">
+                            {% for tag in tags %}
+                            <a href="#" class="tag">{{ tag.tag_name }}</a>
+                            {% endfor %}
                         </div>
                     </div>
-
-                    <div class="content__page-header entry__header">
-                        <h1 class="display-1 entry__title">
-                        {{ image['img_name'] }}
-                        </h1>
-                        <ul class="entry__header-meta">
-                            <li class="author">By <a href="#0">{{ image.user_name }}</a></li>
-                            <li class="date">{{ image['img_upload_time'] }}</li>
-                        </ul>
-                    </div> <!-- end entry__header -->
-
-                    <div class="entry__content">
-                        <p>
-                        {{ image['img_description'] }}<!-- 图像描述 -->
-                        </p>
-
-
-                        <p class="entry__tags">
-                            <span>标签</span>
-
-                            <span class="entry__tag-list"><!-- 标签 -->
-                                {% for tag in tags %}
-                                <a href="#0">{{ tag.tag_name }}</a>
-                                {% endfor %}
-                            </span>
-            
-                        </p>
-                    </div> <!-- end entry content -->
-
-
-
-                </article> <!-- end column large-full entry-->
-
-
-                <div class="comments-wrap">
-
-                    <div id="comments" class="column large-12">
-
-                        <h3 class="h2">评论</h3><!-- 需要传递该图片的评论量参数-->
-
-                        <!-- START commentlist -->
-                        <ol class="commentlist">
-                            <!-- for循环展示评论-->
-                            {% for comment in comments %}
-                            <li class="depth-1 comment">
-                                <div class="comment__avatar">
-                                    <img class="avatar" src="{{ url_for('static', filename='images/user.jpg')}}" alt="user" width="50" height="50">
-                                </div>
-
-                                <div class="comment__content">
-                                    <div class="comment__info">
-                                        <div class="comment__author">{{ comment.user_name }}</div>
-                                        <div class="comment__meta">
-                                            <div class="comment__time">{{ comment.comment_release_time}}</div>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="comment__text">
-                                        <p>{{ comment.comment_content }}</p>
-                                    </div>
-
-                                </div>
-
-                            </li> <!-- end comment level 1 -->
-
-                            {% endfor %}
-
-
-
-
-
-                        </ol>
-                        <!-- END commentlist -->
-
-                    </div> <!-- end comments -->
-
-                    <!-- 提交评论 -->
-                    <div class="column large-12 comment-respond">
-
-                        <!-- START respond -->
-                        <div id="respond">
-            
-                            <h3 class="h2">发表评论 </h3>
-
-                            <form name="commentForm" id="commentForm" method="post" action="{{ url_for('add_comment.add_comment') }}" autocomplete="off">
-                                <div class="message form-field">
-                                    <textarea name="commentText" id="commentText" class="full-width" placeholder="请留下你的评论"></textarea>
-                                </div>
-                                <input name="imgId" type="hidden" value="{{image['img_id']}}">
-                                <input name="submitComment" id="submitComment" class="btn btn--primary btn-wide btn--large full-width" value="添加评论" type="submit">
-                            </form>
-            
-                        </div>
-                        <!-- END respond-->
-            
-                    </div> <!-- end comment-respond -->
-            
-                </div> <!-- end comments-wrap -->
-            </main>
-
-        </div> <!-- end s-content -->
-
-
-        <!-- footer定义页面的页脚部分，包括版权信息和“返回顶部”链接。
-        ================================================== -->
-        <footer class="s-footer footer">
-            <div class="row">
-                <div class="column large-full footer__content">
-                    <div class="footer__copyright">
                     
+                    <!-- 图片信息元数据 -->
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="bg-gray-900/50 p-3 rounded-lg">
+                            <div class="text-gray-400 text-sm">尺寸</div>
+                            <div class="font-medium">{{ image['img_width'] }} × {{ image['img_height'] }}</div>
+                        </div>
+                        <div class="bg-gray-900/50 p-3 rounded-lg">
+                            <div class="text-gray-400 text-sm">格式</div>
+                            <div class="font-medium">{{ image['img_format'] | upper }}</div>
+                        </div>
+                        <div class="bg-gray-900/50 p-3 rounded-lg">
+                            <div class="text-gray-400 text-sm">文件大小</div>
+                            <div class="font-medium">{{ image['file_size'] | filesizeformat }}</div>
+                        </div>
+                        <div class="bg-gray-900/50 p-3 rounded-lg">
+                            <div class="text-gray-400 text-sm">浏览数</div>
+                            <div class="font-medium">{{ image['view_count'] }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="flex space-x-3">
+                        <a href="{{ url_for('static', filename='images/user_upload/' + image['img_path'] + '.' + image['img_format']) }}" 
+                           download 
+                           class="btn-primary hover:bg-gray-600 px-4 py-2 rounded-lg flex items-center">
+                            <i class="fas fa-download mr-2"></i> 下载
+                        </a>
+                        
+                        <button onclick="copyPageUrl()" 
+                                class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition-colors flex items-center">
+                            <i class="fas fa-share-alt mr-2"></i> 分享
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div class="go-top">
-                <a class="smoothscroll" title="Back to Top" href="#top"></a>
+            
+                    <!-- 评论区 -->
+<div class="max-w-6xl mx-auto mt-16">
+    <div class="border-t border-gray-800 pt-12">
+        <h3 class="text-2xl font-bold mb-8 gradient-text">评论 ({{ comments|length }})</h3>
+        
+        <!-- 两栏评论布局 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧 - 已有评论列表 (占2/3宽度) -->
+            <div class="lg:col-span-2">
+                <div class="space-y-4">
+                    {% for comment in comments %}
+                    <div class="comment-card p-4 rounded-lg animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index * 0.05 }}s">
+                        <div class="flex items-start space-x-4">
+                            <img src="{{ url_for('static', filename='images/user.jpg')}}" alt="用户头像" 
+                                 class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                            <div class="flex-grow">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h4 class="font-medium text-indigo-400">{{ comment.user_name }}</h4>
+                                    <span class="text-sm text-gray-500">{{ comment.comment_release_time }}</span>
+                                </div>
+                                <p class="text-gray-300">{{ comment.comment_content }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if comments|length == 0 %}
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="far fa-comment-dots text-4xl mb-3"></i>
+                        <p>还没有评论，快来抢沙发吧~</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 右侧 - 发表评论模块 (占1/3宽度) -->
+            <div class="lg:col-span-1">
+                <div class="bg-panel p-6 rounded-lg shadow-lg sticky top-4">
+                    <h3 class="text-xl font-bold mb-4 gradient-text">发表评论</h3>
+                    <form name="commentForm" id="commentForm" method="post" action="{{ url_for('add_comment.add_comment') }}" autocomplete="off">
+                        <div class="mb-4">
+                            <textarea name="commentText" id="commentText" 
+                                      class="w-full bg-gray-900/50 border border-gray-800 rounded-lg p-3 text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" 
+                                      placeholder="请留下你的评论..." 
+                                      rows="5"
+                                      required></textarea>
+                        </div>
+                        <input name="imgId" type="hidden" value="{{image['img_id']}}">
+                        <button type="submit" 
+                                class="btn-primary px-6 py-3 rounded-lg font-medium w-full flex items-center justify-center"
+                                id="submit-comment">
+                            <span id="submit-text">添加评论</span>
+                            <span id="submit-spinner" class="ml-2 hidden">
+                                <div class="loading-spinner"></div>
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                    
+                </div>
+            </div>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="py-8 border-t border-gray-800 mt-12">
+            <div class="container mx-auto px-4 text-center text-gray-400">
+                <p>© 2023 ImageFlow. All rights reserved.</p>
+                <div class="mt-4">
+                    <a href="#top" class="smoothscroll inline-flex items-center justify-center w-10 h-10 bg-indigo-600 rounded-full hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        </svg>
+                    </a>
+                </div>
             </div>
         </footer>
+    </div>
 
-    </div> <!-- end s-wrap -->
-
-
-    <!-- Java Script
-    ================================================== -->
+    <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+        // 移除预加载器
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+            preloader.classList.add('hidden');
+        }
 
+        // 收藏按钮切换状态
+        const favBtn = document.getElementById('favorite-btn');
+        let isFavorited = {{ 'true' if image['is_favorite'] else 'false' }}; // 从后端获取初始状态
+
+        favBtn.addEventListener('click', function () {
+            const icon = favBtn.querySelector('i');
+            isFavorited = !isFavorited;
+            
+            // 发送AJAX请求更新收藏状态
+            fetch('/toggle_favorite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    img_id: {{ image['img_id'] }}
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (isFavorited) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'text-red-500');
+                        favBtn.classList.remove('text-gray-400');
+                        favBtn.classList.add('text-red-500');
+                    } else {
+                        icon.classList.remove('fas', 'text-red-500');
+                        icon.classList.add('far');
+                        favBtn.classList.remove('text-red-500');
+                        favBtn.classList.add('text-gray-400');
+                    }
+                } else {
+                    // 如果请求失败，恢复原状态
+                    isFavorited = !isFavorited;
+                    alert('操作失败，请重试');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // 发生错误时恢复原状态
+                isFavorited = !isFavorited;
+                alert('操作失败，请重试');
+            });
+        });
+
+        // 评论提交按钮加载效果
+        const commentForm = document.getElementById('commentForm');
+        const submitBtn = document.getElementById('submit-comment');
+        const submitText = document.getElementById('submit-text');
+        const submitSpinner = document.getElementById('submit-spinner');
+
+        commentForm.addEventListener('submit', function () {
+            submitBtn.disabled = true;
+            submitText.textContent = '正在提交...';
+            submitSpinner.classList.remove('hidden');
+        });
+
+        // 移动端菜单按钮逻辑（可选）
+        const mobileMenuBtn = document.getElementById('mobile-menu-button');
+        mobileMenuBtn.addEventListener('click', function () {
+            // 如果你有移动菜单，可以在这里加 toggle 逻辑
+            alert('移动端菜单展开功能尚未实现'); // 占位用
+        });
+    });
+
+    // 复制页面URL的函数
+    function copyPageUrl() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            alert('链接已复制到剪贴板！');
+        }).catch(err => {
+            console.error('复制失败:', err);
+            alert('复制失败，请手动复制链接');
+        });
+    }
+    </script>
 </body>
+</html>

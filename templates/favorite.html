@@ -1,149 +1,513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>用户收藏夹</title>
-
-    <!-- Required meta tags -->
+    <title>我的收藏 | ImageFlow</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-
-    <!-- FontAwesome CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
-
-    <!-- Styles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ImageFlow - 您的图片收藏夹">
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_favorite.css') }}">
 
-        <style>
-        /* 添加的CSS代码 */
-/* 左侧菜单背景色 */
-.site-navigation {
-    background-color: #000;
-}
-
-/* 修改站点标题文字颜色 */
-.site-title a {
-    color: #fff;
-}
-
-/* 修改导航菜单文字颜色 */
-.main-menu li a {
-    color: #fff;
-}
-
-.main-menu li a:hover,
-.main-menu li.current-menu-item a {
-    color: #f0437e;
-}
-
-/* 修改社交媒体链接颜色 */
-.social-profiles ul li a {
-    color: #fff;
-}
-
-.social-profiles ul li a:hover {
-    color: #f0437e;
-}
-
-.site-header {
-    background-color: #000; /* 黑色背景 */
-    color: #fff; /* 白色文字 */
-}
-
-/* 修改 hamburger-menu 图标颜色 */
-.hamburger-menu .menu-icon img,
-.hamburger-menu .menu-close-icon img {
-    filter: brightness(0) invert(1); /* 将图标颜色反转为白色 */
-}
-
-.site-title img {
-    max-width: 100%; /* 设置最大宽度为父元素的100% */
-    max-height: 100px; /* 设置最大高度 */
-    /* 可以根据实际需要调整宽度和高度 */
-}
-
-        </style>
-
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --accent: #ec4899;
+            --dark: #111827;
+            --darker: #0d1321;
+            --light: #f3f4f6;
+            --gray: #6b7280;
+            --dark-gray: #374151;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--darker);
+            color: var(--light);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .bg-panel {
+            background-color: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .portfolio-item {
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .portfolio-item img {
+            transition: all 0.5s ease;
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        
+        .portfolio-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .portfolio-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .portfolio-item:hover .portfolio-overlay {
+            opacity: 1;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: var(--dark-gray);
+            color: var(--light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        
+        .tag:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .header {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--dark-gray);
+        }
+        
+        .sidebar {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--dark-gray);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-link:hover {
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 响应式布局调整 */
+        @media (max-width: 768px) {
+            .portfolio-item img {
+                height: 200px;
+            }
+        }
+    </style>
 </head>
 
-<body>
-<header class="site-header">
-    <div class="site-branding">
-        <h1 class="site-title"><a href="{{ url_for('main.main') }}" rel="home"><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Homepage"></a></h1>
-    </div><!-- .site-branding -->
+<body class="bg-darker">
 
-    <div class="hamburger-menu">
-        <div class="menu-icon">
-            <img src="{{ url_for('static', filename='images/favorite/menu-icon.png') }}" alt="menu icon">
-        </div><!-- .menu-icon -->
+    <!-- 预加载器 -->
+    <div id="preloader" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
+        <div class="dots-fade flex space-x-4">
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></div>
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse delay-100"></div>
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse delay-200"></div>
+        </div>
+    </div>
 
-        <div class="menu-close-icon">
-            <img src="{{ url_for('static', filename='images/favorite/x.png') }}" alt="menu close icon">
-        </div><!-- .menu-close-icon -->
-    </div><!-- .hamburger-menu -->
-</header><!-- .site-header -->
+    <!-- 页面容器 -->
+    <div id="top" class="min-h-screen flex flex-col md:flex-row">
 
-<nav class="site-navigation flex flex-column justify-content-between">
-    <div class="site-branding d-none d-lg-block ">
-        <h1 class="site-title"><a href="{{ url_for('main.main') }}" rel="home"><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Homepage"></a></h1>
-    </div><!-- .site-branding -->
+        <!-- 侧边栏导航 (移动端隐藏) -->
+        <aside class="sidebar w-64 fixed h-full z-40 hidden md:block">
+            <div class="p-6 flex flex-col h-full">
+                <!-- Logo -->
+                <div class="mb-8">
+                    <a href="{{ url_for('main.main') }}" class="text-2xl font-bold gradient-text">ImageFlow</a>
+                </div>
+                
+                <!-- 导航菜单 -->
+                <nav class="flex-grow">
+                    <ul class="space-y-3">
+                        <li>
+                            <a href="{{ url_for('main.main') }}" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                                <i class="fas fa-home mr-3"></i> 返回首页
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                                <i class="fas fa-user mr-3"></i> 个人资料
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                                <i class="fas fa-cog mr-3"></i> 设置
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <!-- 社交媒体链接 -->
+                <div class="mt-auto mb-6">
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                            <i class="fab fa-pinterest"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 版权信息 -->
+                <div class="text-xs text-gray-500">
+                    © 2023 ImageFlow. All rights reserved.
+                </div>
+            </div>
+        </aside>
 
-    <ul class="main-menu flex flex-column justify-content-center">
-        <li class="current-menu-item"><a href="{{ url_for('main.main') }}">返回首页</a></li>
-        <li><a href="#">关于</a></li>
-        <li><a href="#">Contact</a></li>
-    </ul>
+        <!-- 主要内容区域 -->
+        <div class="flex-grow md:ml-64">
 
-    <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-</p>
+            <!-- 顶部导航 (移动端) -->
+            <header class="header sticky top-0 z-30 py-4 px-6 flex justify-between items-center md:hidden">
+                <a href="{{ url_for('main.main') }}" class="text-xl font-bold gradient-text">ImageFlow</a>
+                <button id="mobile-menu-button" class="text-gray-400 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </header>
 
+            <!-- 移动端侧边栏菜单 (默认隐藏) -->
+            <div id="mobile-sidebar" class="fixed inset-0 z-40 bg-black bg-opacity-80 backdrop-filter backdrop-blur-sm hidden">
+                <div class="absolute top-0 right-0 p-4">
+                    <button id="close-mobile-menu" class="text-white text-2xl">&times;</button>
+                </div>
+                <div class="flex flex-col items-center justify-center h-full p-6">
+                    <ul class="space-y-6 text-center">
+                        <li>
+                            <a href="{{ url_for('main.main') }}" class="text-2xl text-white hover:text-indigo-400">返回首页</a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-2xl text-white hover:text-indigo-400">我的收藏</a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-2xl text-white hover:text-indigo-400">个人资料</a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-2xl text-white hover:text-indigo-400">设置</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
 
-    <div class="social-profiles">
-        <ul class="flex justify-content-start justify-content-lg-center align-items-center">
-            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-            <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-            <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-        </ul>
-    </div><!-- .social-profiles -->
-</nav><!-- .site-navigation -->
+            <!-- 收藏内容 -->
+            <main class="p-6">
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h1 class="text-3xl md:text-4xl font-bold gradient-text">我的收藏</h1>
+                        <button onclick="showCreateFolderModal()" class="btn-primary px-4 py-2 rounded-lg flex items-center">
+                            <i class="fas fa-folder-plus mr-2"></i> 创建收藏夹
+                        </button>
+                    </div>
+                    <p class="text-gray-400">您已收藏 {{ imgs|length }} 张图片</p>
+                </div>
 
-<div class="nav-bar-sep d-lg-none"></div>
-<div class="outer-container home-page">
-    <div class="container-fluid">
-        <div class="row"><!-- .正文内容，替换成数据库中的favorite -->
-            {% for img in imgs %}
-            <div class="col-12 col-md-6 col-lg-3 no-padding">
-                <div class="portfolio-content">
-                    <figure>
-                        <img src="{{ url_for('static', filename='images/user_upload/' + img['img_path'] + '.' + img['img_format']) }}" alt="">
-                    </figure>
+                <!-- 收藏夹列表 -->
+                <div class="mb-8">
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="filterByFolder('all')" class="folder-btn active px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors">
+                            全部
+                        </button>
+                        {% for folder in folders %}
+                        <button onclick="filterByFolder('{{ folder.name }}')" class="folder-btn px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors">
+                            {{ folder.name }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- 图片网格 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {% for img in imgs %}
+                    <div class="portfolio-item animate__animated animate__fadeIn" style="animation-delay: {{ loop.index * 0.05 }}s">
+                        <a href="{{ url_for('img.img', img_id=img['img_id']) }}" class="block relative">
+                            <img src="{{ url_for('static', filename='images/user_upload/' + img['img_path'] + '.' + img['img_format']) }}" 
+                                 alt="{{ img['img_name'] }}"
+                                 class="w-full">
+                            <div class="portfolio-overlay">
+                                <h3 class="text-white font-bold text-lg mb-2">{{ img['img_name'] }}</h3>
+                                <ul class="flex flex-wrap">
+                                    {% if img['img_label'] %}
+                                    <li><span class="tag">{{ img['img_label'] }}</span></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </a>
+                        <button onclick="removeFromFavorite({{ img['img_id'] }})" 
+                                class="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 rounded-full text-white transition-colors">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if imgs|length == 0 %}
+                    <div class="col-span-full text-center py-12">
+                        <i class="far fa-heart text-5xl text-gray-500 mb-4"></i>
+                        <p class="text-gray-400">您还没有收藏任何图片</p>
+                        <a href="{{ url_for('main.main') }}" class="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors">
+                            去探索图片
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </main>
 
-                    <div class="entry-content flex flex-column align-items-center justify-content-center">
-                        <h3><a href="#">{{ img['img_name'] }}</a></h3>
+            <!-- 创建收藏夹模态框 -->
+            <div id="createFolderModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+                <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                    <h2 class="text-2xl font-bold mb-4 gradient-text">创建收藏夹</h2>
+                    <form id="createFolderForm" onsubmit="createFolder(event)">
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">收藏夹名称</label>
+                            <input type="text" 
+                                   id="folderName" 
+                                   class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                   required>
+                        </div>
+                        <div class="flex justify-end space-x-4">
+                            <button type="button" 
+                                    onclick="hideCreateFolderModal()"
+                                    class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+                                取消
+                            </button>
+                            <button type="submit" 
+                                    class="btn-primary px-4 py-2 rounded-lg">
+                                创建
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                        <ul class="flex flex-wrap justify-content-center">
-                            <li><a href="#">{{ img['img_label'] }}</a></li>
-                        </ul>
-                    </div><!-- .entry-content -->
-                </div><!-- .portfolio-content -->
-            </div><!-- .col -->
-            {% endfor %}
-        </div><!-- .row -->
-    </div><!-- .container-fluid -->
-</div><!-- .outer-container -->
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+    
+    <script>
+        // 页面加载完成后隐藏预加载器
+        window.addEventListener('load', function() {
+            document.getElementById('preloader').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                document.getElementById('preloader').style.display = 'none';
+            }, 500);
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            document.getElementById('mobile-sidebar').classList.remove('hidden');
+        });
+        
+        document.getElementById('close-mobile-menu').addEventListener('click', function() {
+            document.getElementById('mobile-sidebar').classList.add('hidden');
+        });
+        
+        // 初始化 Lightbox
+        lightbox.option({
+            'resizeDuration': 200,
+            'wrapAround': true,
+            'showImageNumberLabel': true,
+            'positionFromTop': 100
+        });
+        
+        // 图片悬停效果
+        document.querySelectorAll('.portfolio-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.querySelector('img').style.transform = 'scale(1.05)';
+                this.querySelector('.portfolio-overlay').style.opacity = '1';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.querySelector('img').style.transform = 'scale(1)';
+                this.querySelector('.portfolio-overlay').style.opacity = '0';
+            });
+        });
 
-<div class="scroll-down flex flex-column justify-content-center align-items-center d-none d-lg-block">
-    <span class="arrow-down flex justify-content-center align-items-center"><img src="{{ url_for('static', filename='images/favorite/arrow-down.png') }}" alt="arrow"></span>
-    <!-- <span class="scroll-text">Scroll Down</span> -->
-</div><!-- .scroll-down -->
+        // 显示创建收藏夹模态框
+        function showCreateFolderModal() {
+            document.getElementById('createFolderModal').classList.remove('hidden');
+            document.getElementById('createFolderModal').classList.add('flex');
+        }
 
-<script type='text/javascript' src="{{ url_for('static', filename='js/jquery.js') }}"></script>
-<script type='text/javascript' src="{{ url_for('static', filename='js/custom.js') }}"></script>
+        // 隐藏创建收藏夹模态框
+        function hideCreateFolderModal() {
+            document.getElementById('createFolderModal').classList.add('hidden');
+            document.getElementById('createFolderModal').classList.remove('flex');
+        }
 
+        // 创建收藏夹
+        function createFolder(event) {
+            event.preventDefault();
+            const folderName = document.getElementById('folderName').value;
+            
+            fetch('/create_folder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    folder_name: folderName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 添加新的收藏夹按钮
+                    const folderList = document.querySelector('.flex.flex-wrap');
+                    const newButton = document.createElement('button');
+                    newButton.className = 'folder-btn px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors';
+                    newButton.onclick = () => filterByFolder(folderName);
+                    newButton.textContent = folderName;
+                    folderList.appendChild(newButton);
+                    
+                    hideCreateFolderModal();
+                    document.getElementById('createFolderForm').reset();
+                } else {
+                    alert('创建收藏夹失败，请重试');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('创建收藏夹失败，请重试');
+            });
+        }
+
+        // 按收藏夹筛选
+        function filterByFolder(folderName) {
+            const items = document.querySelectorAll('.portfolio-item');
+            const buttons = document.querySelectorAll('.folder-btn');
+            
+            // 更新按钮状态
+            buttons.forEach(btn => {
+                if (btn.textContent.trim() === folderName) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // 筛选图片
+            items.forEach(item => {
+                const tags = Array.from(item.querySelectorAll('.tag')).map(tag => tag.textContent);
+                if (folderName === 'all' || tags.includes(folderName)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // 从收藏中移除
+        function removeFromFavorite(imgId) {
+            if (!confirm('确定要从收藏中移除这张图片吗？')) {
+                return;
+            }
+            
+            fetch('/remove_favorite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    img_id: imgId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 移除图片元素
+                    const item = document.querySelector(`.portfolio-item a[href*="/img/${imgId}"]`).closest('.portfolio-item');
+                    item.remove();
+                    
+                    // 更新收藏数量
+                    const countElement = document.querySelector('.text-gray-400');
+                    const currentCount = parseInt(countElement.textContent.match(/\d+/)[0]);
+                    countElement.textContent = `您已收藏 ${currentCount - 1} 张图片`;
+                    
+                    // 如果没有图片了，显示空状态
+                    if (currentCount - 1 === 0) {
+                        const grid = document.querySelector('.grid');
+                        grid.innerHTML = `
+                            <div class="col-span-full text-center py-12">
+                                <i class="far fa-heart text-5xl text-gray-500 mb-4"></i>
+                                <p class="text-gray-400">您还没有收藏任何图片</p>
+                                <a href="{{ url_for('main.main') }}" class="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors">
+                                    去探索图片
+                                </a>
+                            </div>
+                        `;
+                    }
+                } else {
+                    alert('移除失败，请重试');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('移除失败，请重试');
+            });
+        }
+    </script>
 </body>
 </html>
