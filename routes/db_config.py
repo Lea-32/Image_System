@@ -1,19 +1,19 @@
 # 设置数据库连接参数
 def config(is_admin):
-    driver = 'ODBC Driver 17 for SQL Server'#'SQL Server'
+    driver = 'ODBC Driver 17 for SQL Server'
     server = 'localhost'
     port = '1433'
-    database = 'Image_System'
+    database = 'image'
 
     if is_admin:
         # 管理员账号
         username = 'sa'
         password = '123456'
-
-    else:#普通用户账号
+    else:
+        # 普通用户账号
         username = 'user'
         password = '123456'
 
-    connection_string = f'DRIVER={driver};SERVER={server}; PORT={port}; DATABASE={database}; UID={username}; PWD={password}'
-    print(connection_string)
+    connection_string = f'DRIVER={driver};SERVER={server};PORT={port};DATABASE={database};UID={username};PWD={password};Trusted_Connection=no'
+    print(f"正在使用用户 {username} 连接到数据库 {database}")
     return connection_string

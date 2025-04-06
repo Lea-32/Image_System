@@ -11,7 +11,7 @@ def config(is_admin):
         password = '123456'
 
     else:#普通用户账号
-        username = 'user'
+        username = 'yuyang'
         password = '123456'
 
     connection_string = f'DRIVER={driver};SERVER={server}; PORT={port}; DATABASE={database}; UID={username}; PWD={password};Trusted_Connection=no;'
