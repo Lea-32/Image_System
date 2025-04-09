@@ -277,39 +277,37 @@
                 </div>
                 
                 <!-- 图片网格 -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {% for img in imgs %}
-                    <div class="portfolio-item animate__animated animate__fadeIn" style="animation-delay: {{ loop.index * 0.05 }}s">
-                        <a href="{{ url_for('img.img', img_id=img['img_id']) }}" class="block relative">
-                            <img src="{{ url_for('static', filename='images/user_upload/' + img['img_path'] + '.' + img['img_format']) }}" 
-                                 alt="{{ img['img_name'] }}"
-                                 class="w-full">
-                            <div class="portfolio-overlay">
-                                <h3 class="text-white font-bold text-lg mb-2">{{ img['img_name'] }}</h3>
-                                <ul class="flex flex-wrap">
-                                    {% if img['img_label'] %}
-                                    <li><span class="tag">{{ img['img_label'] }}</span></li>
-                                    {% endif %}
-                                </ul>
-                            </div>
-                        </a>
-                        <button onclick="removeFromFavorite({{ img['img_id'] }})" 
-                                class="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 rounded-full text-white transition-colors">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    {% endfor %}
-                    
-                    {% if imgs|length == 0 %}
-                    <div class="col-span-full text-center py-12">
-                        <i class="far fa-heart text-5xl text-gray-500 mb-4"></i>
-                        <p class="text-gray-400">您还没有收藏任何图片</p>
-                        <a href="{{ url_for('main.main') }}" class="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors">
-                            去探索图片
-                        </a>
-                    </div>
+                <!-- 图片网格 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {% for img in imgs %}
+    <div class="portfolio-item animate__animated animate__fadeIn" style="animation-delay: {{ loop.index * 0.05 }}s">
+        <a href="{{ url_for('img.img', img_id=img['img_id']) }}" class="block relative">
+            <img src="{{ url_for('static', filename='images/user_upload/' + img['img_path'] + '.' + img['img_format']) }}"
+                 alt="{{ img['img_name'] }}"
+                 class="w-full">
+            <div class="portfolio-overlay">
+                <h3 class="text-white font-bold text-lg mb-2">{{ img['img_name'] }}</h3>
+                <ul class="flex flex-wrap">
+                    {% if img['img_label'] %}
+                    <li><span class="tag">{{ img['img_label'] }}</span></li>
                     {% endif %}
-                </div>
+                </ul>
+            </div>
+        </a>
+
+        <button onclick="toggleFavorite(this, {{ img['img_id'] }})"
+                class="absolute bottom-2 right-2 w-8 h-8 bg-white/70 rounded-full p-1 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 24 24"
+                   fill="currentColor"
+                   class="w-full h-full text-gray-600">
+                <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+        </button>
+
+    </div>
+    {% endfor %}
+</div>
             </main>
 
             <!-- 创建收藏夹模态框 -->
@@ -460,33 +458,43 @@
         }
 
         // 从收藏中移除
-        function removeFromFavorite(imgId) {
-            if (!confirm('确定要从收藏中移除这张图片吗？')) {
-                return;
-            }
-            
-            fetch('/remove_favorite', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    img_id: imgId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // 移除图片元素
-                    const item = document.querySelector(`.portfolio-item a[href*="/img/${imgId}"]`).closest('.portfolio-item');
-                    item.remove();
-                    
-                    // 更新收藏数量
-                    const countElement = document.querySelector('.text-gray-400');
+        function toggleFavorite(button, imgId) {
+    fetch(`/like/${imgId}`, {
+        method: 'POST',
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`网络响应错误: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('收到的数据:', data);
+
+        const starIcon = button.querySelector('.star-icon');
+
+        if (data.status === '已收藏') {
+            // 设置为已收藏样式
+            starIcon.classList.add('text-yellow-400');
+            starIcon.classList.remove('text-gray-400');
+            button.classList.add('已收藏');
+        } else {
+            // 设置为未收藏样式
+            starIcon.classList.remove('text-yellow-400');
+            starIcon.classList.add('text-gray-400');
+            button.classList.remove('已收藏');
+
+            // 如果在收藏页面，移除卡片并更新计数
+            const item = button.closest('.portfolio-item');
+            if (item) {
+                item.remove();
+
+                const countElement = document.querySelector('.text-gray-400');
+                if (countElement) {
                     const currentCount = parseInt(countElement.textContent.match(/\d+/)[0]);
                     countElement.textContent = `您已收藏 ${currentCount - 1} 张图片`;
-                    
-                    // 如果没有图片了，显示空状态
+
                     if (currentCount - 1 === 0) {
                         const grid = document.querySelector('.grid');
                         grid.innerHTML = `
@@ -499,15 +507,15 @@
                             </div>
                         `;
                     }
-                } else {
-                    alert('移除失败，请重试');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('移除失败，请重试');
-            });
+            }
         }
+    })
+    .catch(error => {
+        console.error('切换收藏状态时发生错误:', error);
+        alert('操作失败，请重试');
+    });
+}
     </script>
 </body>
 </html>
