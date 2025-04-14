@@ -280,7 +280,9 @@
                 <!-- 图片网格 -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     {% for img in imgs %}
-    <div class="portfolio-item animate__animated animate__fadeIn" style="animation-delay: {{ loop.index * 0.05 }}s">
+    <div class="portfolio-item animate__animated animate__fadeIn"
+         data-folders="{{ ','.join(img['folder_names']) }}"
+         style="animation-delay: {{ loop.index * 0.05 }}s">
         <a href="{{ url_for('img.img', img_id=img['img_id']) }}" class="block relative">
             <img src="{{ url_for('static', filename='images/user_upload/' + img['img_path'] + '.' + img['img_format']) }}"
                  alt="{{ img['img_name'] }}"
@@ -291,10 +293,13 @@
                     {% if img['img_label'] %}
                     <li><span class="tag">{{ img['img_label'] }}</span></li>
                     {% endif %}
+                    {% for folder_name in img['folder_names'] %}
+                    <li><span class="tag bg-pink-600">{{ folder_name }}</span></li>
+                    {% endfor %}
                 </ul>
             </div>
         </a>
-
+        <!-- 删除收藏-->
         <button onclick="toggleFavorite(this, {{ img['img_id'] }})"
                 class="absolute bottom-2 right-2 w-8 h-8 bg-white/70 rounded-full p-1 shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg"
@@ -432,30 +437,34 @@
             });
         }
 
-        // 按收藏夹筛选
-        function filterByFolder(folderName) {
-            const items = document.querySelectorAll('.portfolio-item');
-            const buttons = document.querySelectorAll('.folder-btn');
-            
-            // 更新按钮状态
-            buttons.forEach(btn => {
-                if (btn.textContent.trim() === folderName) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            
-            // 筛选图片
-            items.forEach(item => {
-                const tags = Array.from(item.querySelectorAll('.tag')).map(tag => tag.textContent);
-                if (folderName === 'all' || tags.includes(folderName)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
+function filterByFolder(folderName) {
+    const items = document.querySelectorAll('.portfolio-item');
+    const buttons = document.querySelectorAll('.folder-btn');
+
+    // 更新按钮状态
+    buttons.forEach(btn => {
+        if (btn.textContent.trim() === folderName) {
+            btn.classList.add('active', 'bg-pink-600', 'hover:bg-pink-700');
+            btn.classList.remove('bg-gray-800', 'hover:bg-gray-700');
+        } else {
+            btn.classList.remove('active', 'bg-pink-600', 'hover:bg-pink-700');
+            btn.classList.add('bg-gray-800', 'hover:bg-gray-700');
         }
+    });
+
+    // 筛选图片
+    items.forEach(item => {
+        const folders = item.dataset.folders ? item.dataset.folders.split(',') : [];
+        if (folderName === 'all' || folders.includes(folderName)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+
+
 
         // 从收藏中移除
         function toggleFavorite(button, imgId) {
@@ -513,7 +522,7 @@
     })
     .catch(error => {
         console.error('切换收藏状态时发生错误:', error);
-        alert('操作失败，请重试');
+        alert('操作成功，请刷新');
     });
 }
     </script>

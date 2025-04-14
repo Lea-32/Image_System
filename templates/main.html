@@ -393,10 +393,14 @@ function image_is_favorited(img_id) {
 </script>
 
 <script>
-function toggleFavorite(button, img_id) {
-    fetch(`/like/${img_id}`, {
+let currentImageId = null;
+
+function toggleFavorite(button, imgId) {
+    currentImageId = imgId;
+
+    fetch(`/like/${imgId}`, {
         method: 'POST',
-        credentials: 'same-origin'  // 包含cookie在请求中
+        credentials: 'same-origin'
     })
     .then(response => {
         if (!response.ok) {
@@ -406,24 +410,106 @@ function toggleFavorite(button, img_id) {
     })
     .then(data => {
         console.log('收到的数据:', data);
-
-        // 获取星星图标
         const starIcon = button.querySelector('.star-icon');
 
-        // 根据收藏状态更新星星图标的路径
-        starIcon.src = data.status === '已收藏'
-            ? '{{ url_for('static', filename='images/main/收藏2.png') }}'
-            : '{{ url_for('static', filename='images/main/收藏1.png') }}';
-
-        // 根据响应切换按钮样式
         if (data.status === '已收藏') {
+            // 显示收藏成功模态框
+            showFavoriteModal();
+            // 更新按钮样式
+            starIcon.src = "{{ url_for('static', filename='images/main/收藏2.png') }}";
             button.classList.add('已收藏');
         } else {
+            // 更新按钮样式为未收藏
+            starIcon.src = "{{ url_for('static', filename='images/main/收藏1.png') }}";
             button.classList.remove('已收藏');
         }
     })
     .catch(error => {
         console.error('切换收藏状态时发生错误:', error);
+        alert('操作失败，请重试');
+    });
+}
+
+function showFavoriteModal() {
+    document.getElementById('favoriteModal').classList.remove('hidden');
+    document.getElementById('favoriteModal').classList.add('flex');
+}
+
+function hideFavoriteModal() {
+    document.getElementById('favoriteModal').classList.add('hidden');
+    document.getElementById('favoriteModal').classList.remove('flex');
+}
+
+function showFolderSelection() {
+    hideFavoriteModal();
+    loadFolders();
+    document.getElementById('folderSelectionModal').classList.remove('hidden');
+    document.getElementById('folderSelectionModal').classList.add('flex');
+}
+
+function hideFolderSelection() {
+    document.getElementById('folderSelectionModal').classList.add('hidden');
+    document.getElementById('folderSelectionModal').classList.remove('flex');
+}
+
+function loadFolders() {
+    fetch('/get_folders')
+        .then(response => response.json())
+        .then(folders => {
+            const folderList = document.getElementById('folderList');
+            folderList.innerHTML = folders.map(folder => `
+                <div class="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded">
+                    <input type="checkbox" id="folder-${folder.id}" value="${folder.id}" class="form-checkbox text-pink-500">
+                    <label for="folder-${folder.id}" class="text-white">${folder.name}</label>
+                </div>
+            `).join('');
+        });
+}
+
+function showCreateFolderInput() {
+    document.getElementById('createFolderInput').classList.remove('hidden');
+}
+
+function createNewFolder() {
+    const folderName = document.getElementById('newFolderName').value;
+    if (!folderName) return;
+
+    fetch('/create_folder', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ folder_name: folderName })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('newFolderName').value = '';
+            document.getElementById('createFolderInput').classList.add('hidden');
+            loadFolders();
+        }
+    });
+}
+
+function saveFolderSelection() {
+    const selectedFolders = Array.from(document.querySelectorAll('#folderList input[type="checkbox"]:checked'))
+        .map(checkbox => checkbox.value);
+
+    fetch('/add_to_folders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            image_id: currentImageId,
+            folder_ids: selectedFolders
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            hideFolderSelection();
+        }
     });
 }
 </script>
@@ -448,5 +534,53 @@ function toggleFavorite(button, img_id) {
         }
     }
 </script>
+
+<div id="favoriteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <div class="text-center mb-4">
+            <i class="fas fa-heart text-pink-500 text-4xl mb-2"></i>
+            <h2 class="text-2xl font-bold text-white">收藏成功！</h2>
+        </div>
+        <div class="flex justify-center space-x-4">
+            <button onclick="hideFavoriteModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white">
+                完成
+            </button>
+            <button onclick="showFolderSelection()" class="btn-primary px-4 py-2 rounded-lg text-white bg-pink-500 hover:bg-pink-600">
+                加入专辑
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 收藏夹选择模态框 -->
+<div id="folderSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <h2 class="text-2xl font-bold mb-4 text-white">选择收藏夹</h2>
+        <div class="max-h-60 overflow-y-auto mb-4" id="folderList">
+            <!-- 文件夹列表将通过JavaScript动态加载 -->
+        </div>
+        <div class="flex justify-between items-center">
+
+            <div class="flex space-x-4">
+                <button onclick="hideFolderSelection()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white">
+                    取消
+                </button>
+                <button onclick="saveFolderSelection()" class="btn-primary px-4 py-2 rounded-lg text-white bg-pink-500 hover:bg-pink-600">
+                    确定
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 创建收藏夹输入框 -->
+<div id="createFolderInput" class="hidden mt-4">
+    <div class="flex items-center space-x-2">
+        <input type="text" id="newFolderName" class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500" placeholder="输入收藏夹名称">
+        <button onclick="createNewFolder()" class="px-4 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            创建
+        </button>
+    </div>
+</div>
 
 </body>

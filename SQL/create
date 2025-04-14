@@ -1,0 +1,258 @@
+USE [image]
+GO
+/****** Object:  Table [dbo].[Comment]    Script Date: 2025/4/14 17:14:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Comment](
+	[comment_id] [int] NOT NULL,
+	[comment_content] [varchar](500) NOT NULL,
+	[comment_release_time] [date] NULL,
+	[user_id] [int] NOT NULL,
+	[img_id] [int] NOT NULL,
+ CONSTRAINT [PK_Comment] PRIMARY KEY CLUSTERED
+(
+	[comment_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Favorite]    Script Date: 2025/4/14 17:14:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Favorite](
+	[favorite_id] [int] NOT NULL,
+	[user_id] [int] NOT NULL,
+	[img_id] [int] NOT NULL,
+ CONSTRAINT [PK_Favorite1] PRIMARY KEY CLUSTERED
+(
+	[favorite_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[FavoriteFolder]    Script Date: 2025/4/14 17:14:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[FavoriteFolder](
+	[folder_id] [int] IDENTITY(1,1) NOT NULL,
+	[user_id] [int] NOT NULL,
+	[folder_name] [nvarchar](50) NOT NULL,
+	[folder_description] [nvarchar](200) NULL,
+	[folder_order] [int] NULL,
+	[create_time] [datetime] NULL,
+	[update_time] [datetime] NULL,
+	[is_default] [bit] NULL,
+	[is_deleted] [bit] NULL,
+	[last_used_time] [datetime] NULL,
+PRIMARY KEY CLUSTERED
+(
+	[folder_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Image]    Script Date: 2025/4/14 17:14:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Image](
+	[img_id] [int] NOT NULL,
+	[img_width] [int] NOT NULL,
+	[img_height] [int] NOT NULL,
+	[img_format] [char](4) NOT NULL,
+	[img_upload_time] [date] NOT NULL,
+	[img_path] [varchar](50) NOT NULL,
+	[user_id] [int] NOT NULL,
+	[img_name] [varchar](100) NULL,
+	[img_description] [varchar](500) NULL,
+	[view_count] [int] NOT NULL,
+ CONSTRAINT [PK_Image1] PRIMARY KEY CLUSTERED
+(
+	[img_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ImageFavoriteFolder]    Script Date: 2025/4/14 17:14:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ImageFavoriteFolder](
+	[img_id] [int] NOT NULL,
+	[folder_id] [int] NOT NULL,
+	[img_order] [int] NULL,
+	[add_time] [datetime] NULL,
+PRIMARY KEY CLUSTERED
+(
+	[img_id] ASC,
+	[folder_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Tag]    Script Date: 2025/4/14 17:14:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tag](
+	[tag_id] [int] IDENTITY(1,1) NOT NULL,
+	[tag_name] [varchar](50) NOT NULL,
+PRIMARY KEY CLUSTERED
+(
+	[tag_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Tag_index]    Script Date: 2025/4/14 17:14:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tag_index](
+	[img_id] [int] NOT NULL,
+	[tag_id] [int] NOT NULL,
+PRIMARY KEY CLUSTERED
+(
+	[img_id] ASC,
+	[tag_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Tag_Statistics]    Script Date: 2025/4/14 17:14:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tag_Statistics](
+	[stat_id] [int] IDENTITY(1,1) NOT NULL,
+	[tag_id] [int] NULL,
+	[use_count] [int] NULL,
+	[last_used] [datetime] NULL,
+PRIMARY KEY CLUSTERED
+(
+	[stat_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Users]    Script Date: 2025/4/14 17:14:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Users](
+	[user_id] [int] NOT NULL,
+	[user_name] [varchar](100) NOT NULL,
+	[user_password] [varchar](50) NULL,
+	[user_email] [varchar](50) NULL,
+	[admin] [bit] NOT NULL,
+ CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED
+(
+	[user_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[View_History]    Script Date: 2025/4/14 17:14:16 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[View_History](
+	[view_id] [int] IDENTITY(1,1) NOT NULL,
+	[img_id] [int] NULL,
+	[user_id] [int] NULL,
+	[view_time] [datetime] NULL,
+PRIMARY KEY CLUSTERED
+(
+	[view_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[FavoriteFolder] ADD  DEFAULT ((0)) FOR [folder_order]
+GO
+ALTER TABLE [dbo].[FavoriteFolder] ADD  DEFAULT (getdate()) FOR [create_time]
+GO
+ALTER TABLE [dbo].[FavoriteFolder] ADD  DEFAULT (getdate()) FOR [update_time]
+GO
+ALTER TABLE [dbo].[FavoriteFolder] ADD  DEFAULT ((0)) FOR [is_default]
+GO
+ALTER TABLE [dbo].[FavoriteFolder] ADD  DEFAULT ((0)) FOR [is_deleted]
+GO
+ALTER TABLE [dbo].[FavoriteFolder] ADD  DEFAULT (getdate()) FOR [last_used_time]
+GO
+ALTER TABLE [dbo].[Image] ADD  DEFAULT ((0)) FOR [view_count]
+GO
+ALTER TABLE [dbo].[ImageFavoriteFolder] ADD  DEFAULT ((0)) FOR [img_order]
+GO
+ALTER TABLE [dbo].[ImageFavoriteFolder] ADD  DEFAULT (getdate()) FOR [add_time]
+GO
+ALTER TABLE [dbo].[Tag_Statistics] ADD  DEFAULT ((1)) FOR [use_count]
+GO
+ALTER TABLE [dbo].[Tag_Statistics] ADD  DEFAULT (getdate()) FOR [last_used]
+GO
+ALTER TABLE [dbo].[View_History] ADD  DEFAULT (getdate()) FOR [view_time]
+GO
+ALTER TABLE [dbo].[Comment]  WITH CHECK ADD  CONSTRAINT [FK_Comment_Image] FOREIGN KEY([img_id])
+REFERENCES [dbo].[Image] ([img_id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Comment] CHECK CONSTRAINT [FK_Comment_Image]
+GO
+ALTER TABLE [dbo].[Comment]  WITH CHECK ADD  CONSTRAINT [FK_Comment_User] FOREIGN KEY([user_id])
+REFERENCES [dbo].[Users] ([user_id])
+GO
+ALTER TABLE [dbo].[Comment] CHECK CONSTRAINT [FK_Comment_User]
+GO
+ALTER TABLE [dbo].[Favorite]  WITH CHECK ADD  CONSTRAINT [FK_Favorite1_Image] FOREIGN KEY([img_id])
+REFERENCES [dbo].[Image] ([img_id])
+GO
+ALTER TABLE [dbo].[Favorite] CHECK CONSTRAINT [FK_Favorite1_Image]
+GO
+ALTER TABLE [dbo].[Favorite]  WITH CHECK ADD  CONSTRAINT [FK_Favorite1_Users] FOREIGN KEY([user_id])
+REFERENCES [dbo].[Users] ([user_id])
+GO
+ALTER TABLE [dbo].[Favorite] CHECK CONSTRAINT [FK_Favorite1_Users]
+GO
+ALTER TABLE [dbo].[Favorite]  WITH CHECK ADD  CONSTRAINT [img_id] FOREIGN KEY([img_id])
+REFERENCES [dbo].[Image] ([img_id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Favorite] CHECK CONSTRAINT [img_id]
+GO
+ALTER TABLE [dbo].[FavoriteFolder]  WITH CHECK ADD FOREIGN KEY([user_id])
+REFERENCES [dbo].[Users] ([user_id])
+GO
+ALTER TABLE [dbo].[Image]  WITH CHECK ADD  CONSTRAINT [FK_Image_Users] FOREIGN KEY([user_id])
+REFERENCES [dbo].[Users] ([user_id])
+GO
+ALTER TABLE [dbo].[Image] CHECK CONSTRAINT [FK_Image_Users]
+GO
+ALTER TABLE [dbo].[ImageFavoriteFolder]  WITH CHECK ADD FOREIGN KEY([folder_id])
+REFERENCES [dbo].[FavoriteFolder] ([folder_id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[ImageFavoriteFolder]  WITH CHECK ADD FOREIGN KEY([img_id])
+REFERENCES [dbo].[Image] ([img_id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Tag_index]  WITH CHECK ADD FOREIGN KEY([tag_id])
+REFERENCES [dbo].[Tag] ([tag_id])
+GO
+ALTER TABLE [dbo].[Tag_index]  WITH CHECK ADD  CONSTRAINT [FK_Tag_index_Image] FOREIGN KEY([img_id])
+REFERENCES [dbo].[Image] ([img_id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Tag_index] CHECK CONSTRAINT [FK_Tag_index_Image]
+GO
+ALTER TABLE [dbo].[Tag_Statistics]  WITH CHECK ADD FOREIGN KEY([tag_id])
+REFERENCES [dbo].[Tag] ([tag_id])
+GO
+ALTER TABLE [dbo].[View_History]  WITH CHECK ADD FOREIGN KEY([img_id])
+REFERENCES [dbo].[Image] ([img_id])
+GO
+ALTER TABLE [dbo].[View_History]  WITH CHECK ADD FOREIGN KEY([user_id])
+REFERENCES [dbo].[Users] ([user_id])
+GO
