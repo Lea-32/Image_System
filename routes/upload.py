@@ -7,12 +7,10 @@ from PIL import Image
 import jieba
 from jieba import analyse
 import torch
-from torchvision import transforms, models
+import torchvision
+from torchvision import transforms
 import numpy as np
-from efficientnet_pytorch import EfficientNet
-import timm  # 添加timm库支持更多模型
-import torch.nn.functional as F
-
+import cv2
 
 from db_config import config
 
@@ -35,44 +33,100 @@ upload_bp = Blueprint('upload', __name__)
 class ImageClassifier:
     def __init__(self):
         try:
-            print("\n正在初始化图像分类器...")
-            # 使用多个模型集成
-            self.models = {
-                'efficientnet': EfficientNet.from_pretrained('efficientnet-b4'),
-                'resnet': models.resnet101(pretrained=True),
-                'vit': timm.create_model('vit_base_patch16_224', pretrained=True)
+            print("\n正在初始化MobileNetV3模型...")
+            # 加载预训练的MobileNetV3
+            self.model = torchvision.models.detection.fasterrcnn_mobilenet_v3_large_320_fpn(pretrained=True)
+            self.model.eval()
+            
+            # 设置图像预处理
+            self.transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+            
+            # COCO数据集类别映射
+            self.categories = {
+                1: '人',
+                2: '自行车',
+                3: '汽车',
+                4: '摩托车',
+                5: '飞机',
+                6: '公交车',
+                7: '火车',
+                8: '卡车',
+                9: '船',
+                10: '交通灯',
+                11: '消防栓',
+                13: '停车标志',
+                14: '停车计时器',
+                15: '长椅',
+                16: '鸟',
+                17: '猫',
+                18: '狗',
+                19: '马',
+                20: '羊',
+                21: '牛',
+                22: '大象',
+                23: '熊',
+                24: '斑马',
+                25: '长颈鹿',
+                27: '背包',
+                28: '雨伞',
+                31: '手提包',
+                32: '领带',
+                33: '行李箱',
+                34: '飞盘',
+                35: '滑雪板',
+                36: '雪板',
+                37: '运动球',
+                38: '风筝',
+                39: '棒球棒',
+                40: '棒球手套',
+                41: '滑板',
+                42: '冲浪板',
+                43: '网球拍',
+                44: '瓶子',
+                46: '酒杯',
+                47: '杯子',
+                48: '叉子',
+                49: '刀',
+                50: '勺子',
+                51: '碗',
+                52: '香蕉',
+                53: '苹果',
+                54: '三明治',
+                55: '橙子',
+                56: '西兰花',
+                57: '胡萝卜',
+                58: '热狗',
+                59: '披萨',
+                60: '甜甜圈',
+                61: '蛋糕',
+                62: '椅子',
+                63: '沙发',
+                64: '盆栽',
+                65: '床',
+                67: '餐桌',
+                70: '马桶',
+                72: '电视',
+                73: '笔记本电脑',
+                74: '鼠标',
+                75: '遥控器',
+                76: '键盘',
+                77: '手机',
+                78: '微波炉',
+                79: '烤箱',
+                80: '烤面包机',
+                81: '水槽',
+                82: '冰箱',
+                84: '书',
+                85: '时钟',
+                86: '花瓶',
+                87: '剪刀',
+                88: '泰迪熊',
+                89: '吹风机',
+                90: '牙刷'
             }
-            
-            for model in self.models.values():
-                model.eval()
-            print("模型加载成功")
-            
-            print("设置图像预处理...")
-            # 改进的图像预处理
-            self.preprocess = {
-                'efficientnet': transforms.Compose([
-                    transforms.Resize(380),
-                    transforms.CenterCrop(380),
-                    transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                ]),
-                'resnet': transforms.Compose([
-                    transforms.Resize(256),
-                    transforms.CenterCrop(224),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                ]),
-                'vit': transforms.Compose([
-                    transforms.Resize(256),
-                    transforms.CenterCrop(224),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                ])
-            }
-            print("预处理设置完成")
-            
-            self.categories = self._load_categories()
             print(f"成功加载 {len(self.categories)} 个类别标签")
             
         except Exception as e:
@@ -80,139 +134,68 @@ class ImageClassifier:
             import traceback
             print(traceback.format_exc())
     
-    def _load_categories(self):
-        # 扩展的分类标签，包含更多 ImageNet 类别
-        return {
-            # 动物类
-            '281': '猫',        # tabby cat
-            '282': '狗',        # dog
-            '283': '兔子',      # rabbit
-            '284': '仓鼠',      # hamster
-            '285': '松鼠',      # squirrel
-            '286': '牛',        # cow
-            '287': '斑马',      # zebra
-            '266': '老虎',      # tiger
-            '265': '狮子',      # lion
-            '194': '狐狸',      # fox
-            '153': '吉娃娃',    # chihuahua
-            '185': '熊猫',      # panda
-            '295': '羊',        # sheep
-            '296': '猴子',      # monkey
-            '297': '大象',      # elephant
-            '298': '长颈鹿',    # giraffe
-            '299': '鸟类',      # bird
-            
-            # 人物类
-            '370': '人物',      # person
-            '401': '人像',      # portrait
-            
-            # 电子设备类
-            '407': '电脑',      # computer
-            '504': '键盘',      # keyboard
-            '527': '手机',      # mobile phone
-            '531': '显示器',    # monitor
-            '532': '鼠标',      # mouse
-            
-            # 日常物品
-            '573': '笔记本',    # notebook
-            '920': '书本',      # book
-            '924': '食物',      # food
-            
-            # 交通工具
-            '765': '汽车',      # car
-            '744': '火车',      # train
-            '751': '飞机',      # airplane
-            
-            # 自然景观
-            '833': '树木',      # tree
-            '972': '风景',      # landscape
-            '973': '建筑',      # building
-            '974': '花卉',      # flower
-            
-            # 场景类
-            '463': '办公',      # office
-            '510': '运动',      # sports
-            '742': '交通',      # transportation
-            '834': '自然',      # nature
-            '907': '艺术',      # art
-            '975': '城市',      # city
-            
-            # 其他常见类别
-            '150': '玩具',      # toy
-            '300': '食品',      # food
-            '400': '家具',      # furniture
-            '500': '电器',      # appliance
-            '600': '服装',      # clothing
-            '700': '运动器材',  # sports equipment
-            '800': '乐器',      # musical instrument
-            '900': '工具',      # tool
-        }
-    
     def classify_image(self, image_path):
         try:
             print("\n" + "="*50)
             print(f"开始处理图片: {image_path}")
-            image = Image.open(image_path).convert('RGB')
             
-            if image.size[0] < 100 or image.size[1] < 100:
-                print("图片分辨率过低")
+            # 读取图片
+            image = Image.open(image_path).convert('RGB')
+            if image is None:
+                print("无法读取图片")
                 return []
             
             print(f"图片尺寸: {image.size[0]}x{image.size[1]}")
             
-            # 存储所有模型的预测结果
-            all_predictions = {}
+            # 预处理图片
+            input_tensor = self.transform(image)
+            input_batch = input_tensor.unsqueeze(0)
             
-            # 使用每个模型进行预测
-            for model_name, model in self.models.items():
-                input_tensor = self.preprocess[model_name](image)
-                input_batch = input_tensor.unsqueeze(0)
+            # 使用模型进行预测
+            with torch.no_grad():
+                predictions = self.model(input_batch)
+            
+            # 处理预测结果
+            detections = {}
+            for prediction in predictions:
+                boxes = prediction['boxes']
+                labels = prediction['labels']
+                scores = prediction['scores']
                 
-                with torch.no_grad():
-                    output = model(input_batch)
-                    probabilities = F.softmax(output[0], dim=0)
-                    top5_prob, top5_catid = torch.topk(probabilities, 5)
-                    
-                    # 存储每个模型的预测结果
-                    for i in range(5):
-                        category_id = str(top5_catid[i].item())
-                        confidence = float(top5_prob[i].item())
-                        if category_id in self.categories:
-                            category = self.categories[category_id]
-                            if category not in all_predictions:
-                                all_predictions[category] = []
-                            all_predictions[category].append(confidence)
+                for box, label, score in zip(boxes, labels, scores):
+                    if score > 0.5:  # 置信度阈值
+                        class_id = int(label.item())
+                        if class_id in self.categories:
+                            category = self.categories[class_id]
+                            if category not in detections:
+                                detections[category] = []
+                            detections[category].append(float(score))
+                            print(f"检测到: {category} (置信度: {float(score):.2%})")
             
             # 计算每个类别的平均置信度
             final_predictions = {}
-            for category, confidences in all_predictions.items():
+            for category, confidences in detections.items():
                 avg_confidence = sum(confidences) / len(confidences)
                 final_predictions[category] = avg_confidence
             
             # 按置信度排序
             sorted_predictions = sorted(final_predictions.items(), key=lambda x: x[1], reverse=True)
             
-            print("\n集成预测结果:")
+            print("\n检测结果:")
             print("-"*30)
             
             results = []
             for category, confidence in sorted_predictions[:5]:
                 print(f"类别: {category:<6} - 平均置信度: {confidence:.2%}")
-                # 移除置信度阈值，直接取前三名
                 results.append({
                     'category': category,
                     'confidence': confidence
                 })
             
-            # 返回前三名结果
-            final_results = results[:3]
-            print("\n最终选择的标签:", ", ".join([r['category'] for r in final_results]))
-            print("="*50 + "\n")
-            
-            return final_results
+            return results[:3]
             
         except Exception as e:
-            print(f"图片分类错误: {str(e)}")
+            print(f"图片检测错误: {str(e)}")
             import traceback
             print(traceback.format_exc())
             return []
@@ -308,52 +291,61 @@ def upload():
             flash('图片上传失败。请检查图片格式。', 'error')
             return jsonify({'status': 'error', 'message': '图片上传失败。请检查图片格式。'})
 
+# 在 routes/upload.py 中修改 get_suggested_tags 函数
 @upload_bp.route('/get_suggested_tags', methods=['POST'])
 def get_suggested_tags():
     try:
+        print("\n" + "="*50)
         print("开始处理标签请求")
         title = request.form.get('title', '')
         description = request.form.get('description', '')
-        
-        print(f"收到的标题: {title}")  # 添加调试信息
-        print(f"收到的描述: {description}")  # 添加调试信息
-        
-        # 提取关键词
-        title_keywords = []
-        description_keywords = []
-        
-        if title and title != '请输入你的图像标题':
-            title_keywords = jieba.analyse.extract_tags(title, topK=2, withWeight=False, allowPOS=('n', 'nr', 'ns'))
-            print(f"标题关键词: {title_keywords}")  # 添加调试信息
-        
-        if description and description != '请输入你的图像描述':
-            description_keywords = jieba.analyse.extract_tags(description, topK=3, withWeight=False, allowPOS=('n', 'nr', 'ns'))
-            print(f"描述关键词: {description_keywords}")  # 添加调试信息
+        print(f"标题: {title}")
+        print(f"描述: {description}")
         
         # 处理图片分类
         image_predictions = []
         if 'upl' in request.files:
             img = request.files['upl']
+            print(f"收到图片文件: {img.filename if img else 'None'}")
+            
             if img and allowed_imgformat(img.filename):
                 temp_dir = 'static/images/temp'
                 os.makedirs(temp_dir, exist_ok=True)
                 
                 temp_path = os.path.join(temp_dir, unique_imgname() + '.jpg')
+                print(f"保存临时文件到: {temp_path}")
                 img.save(temp_path)
                 
                 try:
                     # 获取分类结果
+                    print("开始图片分类...")
                     predictions = classifier.classify_image(temp_path)
-                    print("分类结果:", predictions)  # 添加调试信息
+                    print("分类结果:", predictions)
                     
                     # 确保返回前三名的预测结果
                     image_predictions = predictions[:3]
+                    print("最终选择的图片标签:", image_predictions)
+                except Exception as e:
+                    print(f"图片分类出错: {str(e)}")
+                    import traceback
+                    print(traceback.format_exc())
                 finally:
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
+                        print("临时文件已删除")
         
-        # 打印返回的数据以便调试
-        response_data = {
+        # 处理文本分析
+        text_tags = []
+        if title and title.strip():
+            print("分析标题文本...")
+            text_tags.extend(jieba.analyse.extract_tags(title, topK=2))
+        if description and description.strip():
+            print("分析描述文本...")
+            text_tags.extend(jieba.analyse.extract_tags(description, topK=3))
+        print("文本分析结果:", text_tags)
+        
+        # 返回结果
+        result = {
             'image_tags': [
                 {
                     'name': pred['category'],
@@ -361,11 +353,12 @@ def get_suggested_tags():
                 }
                 for pred in image_predictions
             ],
-            'text_tags': list(set(title_keywords + description_keywords))
+            'text_tags': list(set(text_tags))
         }
-        print("返回的数据:", response_data)
+        print("返回结果:", result)
+        print("="*50 + "\n")
         
-        return jsonify(response_data)
+        return jsonify(result)
     except Exception as e:
         print(f"处理标签请求时出错: {str(e)}")
         import traceback
