@@ -246,9 +246,10 @@ def upload():
             cn = pyodbc.connect(connection_string)
             cursor = cn.cursor()
 
-            # 查询当前图片数量
-            cursor.execute("SELECT count(*) FROM Image")
-            img_num = cursor.fetchone()[0]
+            # 获取当前最大的img_id
+            cursor.execute("SELECT MAX(img_id) FROM Image")
+            max_img_id = cursor.fetchone()[0] or 0
+            new_img_id = max_img_id + 1
 
             # 前用户ID
             user_id = session['user_id']
@@ -256,7 +257,7 @@ def upload():
             # 将图像数据插入Image表
             cursor.execute(
                 "INSERT INTO Image (img_id, img_width, img_height, img_format, img_upload_time, img_path, user_id, img_name, img_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (img_num + 1, width, height, img_format, upload_time, img_name, user_id, title, description)
+                (new_img_id, width, height, img_format, upload_time, img_name, user_id, title, description)
             )
             cn.commit()
 
@@ -277,7 +278,7 @@ def upload():
                         # 建立标签索引
                         cursor.execute("Select tag_id from Tag Where tag_name=?", tag.strip())
                         tag_id = cursor.fetchone()[0]
-                        cursor.execute("INSERT INTO Tag_index (img_id,tag_id) Values (?,?) ", (img_num+1, tag_id))
+                        cursor.execute("INSERT INTO Tag_index (img_id,tag_id) Values (?,?) ", (new_img_id, tag_id))
                         cn.commit()
 
             # 设置上传成功的flash消息

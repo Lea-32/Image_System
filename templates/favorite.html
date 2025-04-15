@@ -116,11 +116,16 @@
         
         .sidebar-link {
             transition: all 0.2s ease;
+            color: #9CA3AF; /* 默认灰色 */
         }
         
         .sidebar-link:hover {
-            color: var(--primary);
+            color: white;
             transform: translateX(5px);
+        }
+        
+        .sidebar-link.active {
+            color: white;
         }
         
         .loading-spinner {
@@ -172,17 +177,27 @@
                 <nav class="flex-grow">
                     <ul class="space-y-3">
                         <li>
-                            <a href="{{ url_for('main.main') }}" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                            <a href="{{ url_for('main.main') }}" class="sidebar-link text-gray-400 hover:text-white flex items-center">
                                 <i class="fas fa-home mr-3"></i> 返回首页
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                            <a href="{{ url_for('main.my_images') }}" class="sidebar-link text-gray-400 hover:text-white flex items-center">
+                                <i class="fas fa-images mr-3"></i> 我的图片
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('favorite.favorite') }}" class="sidebar-link active flex items-center">
+                                <i class="fas fa-heart mr-3"></i> 我的收藏
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-link text-gray-400 hover:text-white flex items-center">
                                 <i class="fas fa-user mr-3"></i> 个人资料
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                            <a href="#" class="sidebar-link text-gray-400 hover:text-white flex items-center">
                                 <i class="fas fa-cog mr-3"></i> 设置
                             </a>
                         </li>
@@ -235,16 +250,19 @@
                 <div class="flex flex-col items-center justify-center h-full p-6">
                     <ul class="space-y-6 text-center">
                         <li>
-                            <a href="{{ url_for('main.main') }}" class="text-2xl text-white hover:text-indigo-400">返回首页</a>
+                            <a href="{{ url_for('main.main') }}" class="text-2xl text-gray-400 hover:text-white">返回首页</a>
                         </li>
                         <li>
-                            <a href="#" class="text-2xl text-white hover:text-indigo-400">我的收藏</a>
+                            <a href="{{ url_for('main.my_images') }}" class="text-2xl text-gray-400 hover:text-white">我的图片</a>
                         </li>
                         <li>
-                            <a href="#" class="text-2xl text-white hover:text-indigo-400">个人资料</a>
+                            <a href="{{ url_for('favorite.favorite') }}" class="text-2xl text-white">我的收藏</a>
                         </li>
                         <li>
-                            <a href="#" class="text-2xl text-white hover:text-indigo-400">设置</a>
+                            <a href="#" class="text-2xl text-gray-400 hover:text-white">个人资料</a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-2xl text-gray-400 hover:text-white">设置</a>
                         </li>
                     </ul>
                 </div>
