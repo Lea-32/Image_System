@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>我的图片 | ImageFlow</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ImageFlow - 您的图片收藏夹">
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_favorite.css') }}">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --accent: #ec4899;
+            --dark: #111827;
+            --darker: #0d1321;
+            --light: #f3f4f6;
+            --gray: #6b7280;
+            --dark-gray: #374151;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--darker);
+            color: var(--light);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .bg-panel {
+            background-color: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .portfolio-item {
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .portfolio-item img {
+            transition: all 0.5s ease;
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        
+        .portfolio-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .portfolio-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .portfolio-item:hover .portfolio-overlay {
+            opacity: 1;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: var(--dark-gray);
+            color: var(--light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        
+        .tag:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .header {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--dark-gray);
+        }
+        
+        .sidebar {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--dark-gray);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-link:hover {
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 响应式布局调整 */
+        @media (max-width: 768px) {
+            .portfolio-item img {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-darker">
+
+    <!-- 预加载器 -->
+    <div id="preloader" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
+        <div class="dots-fade flex space-x-4">
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></div>
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse delay-100"></div>
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse delay-200"></div>
+        </div>
+    </div>
+
+    <!-- 页面容器 -->
+    <div id="top" class="min-h-screen flex flex-col md:flex-row">
+
+        <!-- 侧边栏导航 (移动端隐藏) -->
+        <aside class="sidebar w-64 fixed h-full z-40 hidden md:block">
+            <div class="p-6 flex flex-col h-full">
+                <!-- Logo -->
+                <div class="mb-8">
+                    <a href="{{ url_for('main.main') }}" class="text-2xl font-bold gradient-text">ImageFlow</a>
+                </div>
+                
+                <!-- 导航菜单 -->
+                <nav class="flex-grow">
+                    <ul class="space-y-3">
+                        <li>
+                            <a href="{{ url_for('main.main') }}" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                                <i class="fas fa-home mr-3"></i> 返回首页
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('main.my_images') }}" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                                <i class="fas fa-images mr-3"></i> 我的图片
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('favorite.favorite') }}" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                                <i class="fas fa-heart mr-3"></i> 我的收藏
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                                <i class="fas fa-user mr-3"></i> 个人资料
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-link text-gray-300 hover:text-indigo-400 flex items-center">
+                                <i class="fas fa-cog mr-3"></i> 设置
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <!-- 社交媒体链接 -->
+                <div class="mt-auto mb-6">
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                            <i class="fab fa-pinterest"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 版权信息 -->
+                <div class="text-xs text-gray-500">
+                    © 2023 ImageFlow. All rights reserved.
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主要内容区域 -->
+        <div class="flex-grow md:ml-64">
+
+            <!-- 顶部导航 (移动端) -->
+            <header class="header sticky top-0 z-30 py-4 px-6 flex justify-between items-center md:hidden">
+                <a href="{{ url_for('main.main') }}" class="text-xl font-bold gradient-text">ImageFlow</a>
+                <button id="mobile-menu-button" class="text-gray-400 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </header>
+
+            <!-- 移动端侧边栏菜单 (默认隐藏) -->
+            <div id="mobile-sidebar" class="fixed inset-0 z-40 bg-black bg-opacity-80 backdrop-filter backdrop-blur-sm hidden">
+                <div class="absolute top-0 right-0 p-4">
+                    <button id="close-mobile-menu" class="text-white text-2xl">&times;</button>
+                </div>
+                <div class="flex flex-col items-center justify-center h-full p-6">
+                    <ul class="space-y-6 text-center">
+                        <li>
+                            <a href="{{ url_for('main.main') }}" class="text-2xl text-white hover:text-indigo-400">返回首页</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('main.my_images') }}" class="text-2xl text-white hover:text-indigo-400">我的图片</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('favorite.favorite') }}" class="text-2xl text-white hover:text-indigo-400">我的收藏</a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-2xl text-white hover:text-indigo-400">个人资料</a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-2xl text-white hover:text-indigo-400">设置</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 图片内容 -->
+            <main class="p-6">
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h1 class="text-3xl md:text-4xl font-bold gradient-text">我的图片</h1>
+                    </div>
+                    <p class="text-gray-400">您已上传 {{ images|length }} 张图片</p>
+                </div>
+                
+                <!-- 图片网格 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {% for image in images %}
+                    <div class="portfolio-item animate__animated animate__fadeIn"
+                         style="animation-delay: {{ loop.index * 0.05 }}s">
+                        <a href="{{ url_for('img.img', img_id=image['img_id']) }}" class="block relative">
+                            <img src="{{ url_for('static', filename='images/user_upload/' + image['img_path'] + '.' + image['img_format']) }}"
+                                 alt="{{ image['img_name'] }}"
+                                 class="w-full">
+                            <div class="portfolio-overlay">
+                                <h3 class="text-white font-bold text-lg mb-2">{{ image['img_name'] }}</h3>
+                                <ul class="flex flex-wrap">
+                                </ul>
+                            </div>
+                        </a>
+                        <!-- 删除按钮 -->
+                        <button onclick="deleteImage({{ image['img_id'] }})"
+                                class="absolute bottom-2 right-2 w-8 h-8 bg-white/70 rounded-full p-1 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 24 24"
+                                 fill="currentColor"
+                                 class="w-full h-full text-gray-600">
+                                <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+    
+    <script>
+        // 页面加载完成后隐藏预加载器
+        window.addEventListener('load', function() {
+            document.getElementById('preloader').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                document.getElementById('preloader').style.display = 'none';
+            }, 500);
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            document.getElementById('mobile-sidebar').classList.remove('hidden');
+        });
+        
+        document.getElementById('close-mobile-menu').addEventListener('click', function() {
+            document.getElementById('mobile-sidebar').classList.add('hidden');
+        });
+        
+        // 初始化 Lightbox
+        lightbox.option({
+            'resizeDuration': 200,
+            'wrapAround': true,
+            'showImageNumberLabel': true,
+            'positionFromTop': 100
+        });
+        
+        // 图片悬停效果
+        document.querySelectorAll('.portfolio-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.querySelector('img').style.transform = 'scale(1.05)';
+                this.querySelector('.portfolio-overlay').style.opacity = '1';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.querySelector('img').style.transform = 'scale(1)';
+                this.querySelector('.portfolio-overlay').style.opacity = '0';
+            });
+        });
+
+        // 删除图片
+        function deleteImage(img_id) {
+            if (confirm('确定要删除这张图片吗？')) {
+                fetch(`/delete_image/${img_id}`, {
+                    method: 'POST',
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('删除失败：' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+</body>
+</html> 
