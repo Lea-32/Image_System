@@ -316,3 +316,26 @@ def get_images_by_folder(folder_id):
         return jsonify({'success': False, 'message': str(e)})
     finally:
         cn.close()
+
+@favorite_bp.route('/check_image_folders/<int:img_id>', methods=['GET'])
+def check_image_folders(img_id):
+    user_id = session['user_id']
+    connection_string = config(session['admin'])
+    cn = pyodbc.connect(connection_string)
+    cursor = cn.cursor()
+
+    try:
+        # 获取图片所在的所有收藏夹ID
+        cursor.execute("""
+            SELECT DISTINCT f.folder_id
+            FROM ImageFavoriteFolder iff
+            JOIN FavoriteFolder f ON iff.folder_id = f.folder_id
+            WHERE iff.img_id = ? AND f.user_id = ?
+        """, img_id, user_id)
+        
+        folder_ids = [row[0] for row in cursor.fetchall()]
+        return jsonify({'success': True, 'folder_ids': folder_ids})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    finally:
+        cn.close()

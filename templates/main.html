@@ -163,8 +163,8 @@
 
                 <ul class="header__nav">
                     <li class="current"><a href="{{ url_for('main.main') }}" title="">首页</a></li>
-
-                    <li><a href="#" onclick="checkLoginAndRedirect('{{ url_for('upload.upload') }}')" title="">图片上传</a></li><!-- 侧边搜索栏 -->
+                    <li><a href="{{ url_for('recommend.recommend') }}" title="">个性化推荐</a></li>
+                    <li><a href="#" onclick="checkLoginAndRedirect('{{ url_for('upload.upload') }}')" title="">图片上传</a></li>
                     <li><a href="#" onclick="checkLoginAndRedirect('{{ url_for('favorite.favorite') }}')" title="">我的收藏</a></li>
 
                     {% if 'user_id' in session %}

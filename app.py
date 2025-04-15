@@ -8,6 +8,8 @@ from routes.favorite import favorite_bp,like_bp, check_like_bp
 from routes.comment import add_comment_bp
 from routes.search import search_bp
 from routes.delete_img import delete_img_bp
+from routes.recommend import recommend_bp
+from utils.scheduler import start_scheduler
 
 app = Flask(__name__)
 #app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -31,5 +33,10 @@ app.register_blueprint(search_bp)
 
 app.register_blueprint(delete_img_bp)
 
+app.register_blueprint(recommend_bp)
+
 if __name__ == '__main__':
+    # 启动定时任务
+    start_scheduler()
+    # 启动应用
     app.run(debug=True)

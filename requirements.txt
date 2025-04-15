@@ -32,4 +32,5 @@ tqdm==4.66.3
 requests==2.32.0
 # Security
 Flask-Login==0.5.0
-Flask-Security==3.0.0 
+Flask-Security==3.0.0
+apscheduler==3.10.1 
