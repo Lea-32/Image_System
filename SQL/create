@@ -1,6 +1,6 @@
 USE [image]
 GO
-/****** Object:  Table [dbo].[Comment]    Script Date: 2025/4/14 17:14:15 ******/
+/****** Object:  Table [dbo].[Comment]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -11,13 +11,13 @@ CREATE TABLE [dbo].[Comment](
 	[comment_release_time] [date] NULL,
 	[user_id] [int] NOT NULL,
 	[img_id] [int] NOT NULL,
- CONSTRAINT [PK_Comment] PRIMARY KEY CLUSTERED
+ CONSTRAINT [PK_Comment] PRIMARY KEY CLUSTERED 
 (
 	[comment_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Favorite]    Script Date: 2025/4/14 17:14:16 ******/
+/****** Object:  Table [dbo].[Favorite]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -26,13 +26,13 @@ CREATE TABLE [dbo].[Favorite](
 	[favorite_id] [int] NOT NULL,
 	[user_id] [int] NOT NULL,
 	[img_id] [int] NOT NULL,
- CONSTRAINT [PK_Favorite1] PRIMARY KEY CLUSTERED
+ CONSTRAINT [PK_Favorite1] PRIMARY KEY CLUSTERED 
 (
 	[favorite_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[FavoriteFolder]    Script Date: 2025/4/14 17:14:16 ******/
+/****** Object:  Table [dbo].[FavoriteFolder]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -48,13 +48,13 @@ CREATE TABLE [dbo].[FavoriteFolder](
 	[is_default] [bit] NULL,
 	[is_deleted] [bit] NULL,
 	[last_used_time] [datetime] NULL,
-PRIMARY KEY CLUSTERED
+PRIMARY KEY CLUSTERED 
 (
 	[folder_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Image]    Script Date: 2025/4/14 17:14:16 ******/
+/****** Object:  Table [dbo].[Image]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -70,13 +70,13 @@ CREATE TABLE [dbo].[Image](
 	[img_name] [varchar](100) NULL,
 	[img_description] [varchar](500) NULL,
 	[view_count] [int] NOT NULL,
- CONSTRAINT [PK_Image1] PRIMARY KEY CLUSTERED
+ CONSTRAINT [PK_Image1] PRIMARY KEY CLUSTERED 
 (
 	[img_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[ImageFavoriteFolder]    Script Date: 2025/4/14 17:14:16 ******/
+/****** Object:  Table [dbo].[ImageFavoriteFolder]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -86,14 +86,31 @@ CREATE TABLE [dbo].[ImageFavoriteFolder](
 	[folder_id] [int] NOT NULL,
 	[img_order] [int] NULL,
 	[add_time] [datetime] NULL,
-PRIMARY KEY CLUSTERED
+PRIMARY KEY CLUSTERED 
 (
 	[img_id] ASC,
 	[folder_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tag]    Script Date: 2025/4/14 17:14:16 ******/
+/****** Object:  Table [dbo].[ImageSimilarity]    Script Date: 2025/4/17 17:25:21 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ImageSimilarity](
+	[img_id1] [int] NOT NULL,
+	[img_id2] [int] NOT NULL,
+	[similarity_score] [float] NOT NULL,
+	[update_time] [datetime] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[img_id1] ASC,
+	[img_id2] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Tag]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -101,13 +118,13 @@ GO
 CREATE TABLE [dbo].[Tag](
 	[tag_id] [int] IDENTITY(1,1) NOT NULL,
 	[tag_name] [varchar](50) NOT NULL,
-PRIMARY KEY CLUSTERED
+PRIMARY KEY CLUSTERED 
 (
 	[tag_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tag_index]    Script Date: 2025/4/14 17:14:16 ******/
+/****** Object:  Table [dbo].[Tag_index]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -115,14 +132,14 @@ GO
 CREATE TABLE [dbo].[Tag_index](
 	[img_id] [int] NOT NULL,
 	[tag_id] [int] NOT NULL,
-PRIMARY KEY CLUSTERED
+PRIMARY KEY CLUSTERED 
 (
 	[img_id] ASC,
 	[tag_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tag_Statistics]    Script Date: 2025/4/14 17:14:16 ******/
+/****** Object:  Table [dbo].[Tag_Statistics]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -132,13 +149,30 @@ CREATE TABLE [dbo].[Tag_Statistics](
 	[tag_id] [int] NULL,
 	[use_count] [int] NULL,
 	[last_used] [datetime] NULL,
-PRIMARY KEY CLUSTERED
+PRIMARY KEY CLUSTERED 
 (
 	[stat_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Users]    Script Date: 2025/4/14 17:14:16 ******/
+/****** Object:  Table [dbo].[UserRecommendations]    Script Date: 2025/4/17 17:25:21 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UserRecommendations](
+	[user_id] [int] NOT NULL,
+	[img_id] [int] NOT NULL,
+	[score] [float] NOT NULL,
+	[update_time] [datetime] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[user_id] ASC,
+	[img_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Users]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -149,13 +183,30 @@ CREATE TABLE [dbo].[Users](
 	[user_password] [varchar](50) NULL,
 	[user_email] [varchar](50) NULL,
 	[admin] [bit] NOT NULL,
- CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED
+ CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED 
 (
 	[user_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[View_History]    Script Date: 2025/4/14 17:14:16 ******/
+/****** Object:  Table [dbo].[UserSimilarity]    Script Date: 2025/4/17 17:25:21 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UserSimilarity](
+	[user_id1] [int] NOT NULL,
+	[user_id2] [int] NOT NULL,
+	[similarity_score] [float] NOT NULL,
+	[update_time] [datetime] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[user_id1] ASC,
+	[user_id2] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[View_History]    Script Date: 2025/4/17 17:25:21 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -165,7 +216,7 @@ CREATE TABLE [dbo].[View_History](
 	[img_id] [int] NULL,
 	[user_id] [int] NULL,
 	[view_time] [datetime] NULL,
-PRIMARY KEY CLUSTERED
+PRIMARY KEY CLUSTERED 
 (
 	[view_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
